@@ -95,12 +95,12 @@ initDb().then(db => {
             await db.run(
                 'UPDATE projects SET area=$1, encargado=$2, leader=$3, name=$4, status=$5, progress=$6 WHERE id=$7',
                 [
-                    area       ?? existing.area,
-                    encargado  ?? existing.encargado,
-                    leader     ?? existing.leader,
-                    name       ?? existing.name,
-                    status     ?? existing.status,
-                    progress   ?? existing.progress,
+                    area ?? existing.area,
+                    encargado ?? existing.encargado,
+                    leader ?? existing.leader,
+                    name ?? existing.name,
+                    status ?? existing.status,
+                    progress ?? existing.progress,
                     req.params.id
                 ]
             );
@@ -235,11 +235,11 @@ initDb().then(db => {
             await db.run(
                 'UPDATE tickets SET date=$1, subject=$2, description=$3, priority=$4, status=$5 WHERE id=$6',
                 [
-                    date        ?? existing.date,
-                    subject     ?? existing.subject,
+                    date ?? existing.date,
+                    subject ?? existing.subject,
                     description ?? existing.description,
-                    priority    ?? existing.priority,
-                    status      ?? existing.status,
+                    priority ?? existing.priority,
+                    status ?? existing.status,
                     req.params.id
                 ]
             );
@@ -288,6 +288,8 @@ initDb().then(db => {
 
     app.post('/api/ahorros', async (req, res) => {
         try {
+            console.log('Body recibido:', req.body); // ← agrega esta línea
+
             const {
                 project_id, amount, status = 'Proyectado', date,
                 costo_mensual = 0, costo_hora = 0,
@@ -354,19 +356,19 @@ initDb().then(db => {
                     total_antes=$12, total_actual=$13
                 WHERE id=$14`,
                 [
-                    amount                    ?? existing.amount,
-                    status                    ?? existing.status,
-                    date                      ?? existing.date,
-                    costo_mensual             ?? existing.costo_mensual,
-                    costo_hora                ?? existing.costo_hora,
-                    tiempo_empleado_antes     ?? existing.tiempo_empleado_antes,
-                    tiempo_empleado_actual    ?? existing.tiempo_empleado_actual,
-                    tiempo_gestion_antes      ?? existing.tiempo_gestion_antes,
+                    amount ?? existing.amount,
+                    status ?? existing.status,
+                    date ?? existing.date,
+                    costo_mensual ?? existing.costo_mensual,
+                    costo_hora ?? existing.costo_hora,
+                    tiempo_empleado_antes ?? existing.tiempo_empleado_antes,
+                    tiempo_empleado_actual ?? existing.tiempo_empleado_actual,
+                    tiempo_gestion_antes ?? existing.tiempo_gestion_antes,
                     tiempo_gestion_antes_tipo ?? existing.tiempo_gestion_antes_tipo,
-                    tiempo_gestion_actual     ?? existing.tiempo_gestion_actual,
+                    tiempo_gestion_actual ?? existing.tiempo_gestion_actual,
                     tiempo_gestion_actual_tipo ?? existing.tiempo_gestion_actual_tipo,
-                    total_antes               ?? existing.total_antes,
-                    total_actual              ?? existing.total_actual,
+                    total_antes ?? existing.total_antes,
+                    total_actual ?? existing.total_actual,
                     req.params.id
                 ]
             );
@@ -396,10 +398,10 @@ initDb().then(db => {
 
     app.get('/api/dashboard', async (req, res) => {
         try {
-            const { c: totalProyectos }  = await db.getRow('SELECT COUNT(*) as c FROM projects') || { c: 0 };
+            const { c: totalProyectos } = await db.getRow('SELECT COUNT(*) as c FROM projects') || { c: 0 };
             const { c: ticketsAbiertos } = await db.getRow("SELECT COUNT(*) as c FROM tickets WHERE status='Abierto'") || { c: 0 };
             const { c: ticketsCriticos } = await db.getRow("SELECT COUNT(*) as c FROM tickets WHERE priority='Critica' AND status='Abierto'") || { c: 0 };
-            const { t: totalAhorros }    = await db.getRow('SELECT COALESCE(SUM(amount),0) as t FROM savings') || { t: 0 };
+            const { t: totalAhorros } = await db.getRow('SELECT COALESCE(SUM(amount),0) as t FROM savings') || { t: 0 };
             const recentProjects = await db.getAll(`
                 SELECT p.*, s.amount AS savings_amount
                 FROM projects p LEFT JOIN savings s ON s.project_id = p.id
