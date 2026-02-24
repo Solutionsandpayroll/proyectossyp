@@ -288,8 +288,10 @@ initDb().then(db => {
 
     app.post('/api/ahorros', async (req, res) => {
         try {
-            console.log('Body recibido:', req.body); // ← agrega esta línea
-
+            console.log('Body recibido:', req.body);
+            console.log('project_id:', req.body.project_id);
+            console.log('amount:', req.body.amount);
+            console.log('date:', req.body.date);
             const {
                 project_id, amount, status = 'Proyectado', date,
                 costo_mensual = 0, costo_hora = 0,
