@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Ahorros – S&P Gestión</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#102a47",
+                        "accent": "#e51148",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13191f",
+                    },
+                    fontFamily: { "display": ["Outfit", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        html { font-size: 110%; }
+        body { font-family: 'Outfit', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* ── Consolidado styles ── */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes strokeDraw {
+            from { stroke-dashoffset: var(--dash-total); }
+            to   { stroke-dashoffset: var(--dash-offset); }
+        }
+        @keyframes fillBar {
+            from { width: 0%; }
+            to   { width: var(--bar-width); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(229,17,72,0.3); }
+            50%       { box-shadow: 0 0 0 12px rgba(229,17,72,0); }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .consolidado-section { opacity: 0; }
+        .consolidado-section.visible { opacity: 1; }
+
+        .stat-card {
+            animation: scaleIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .arc-ejecutado {
+            stroke-dasharray: var(--dash-total);
+            stroke-dashoffset: var(--dash-total);
+            transition: stroke-dashoffset 1.8s cubic-bezier(0.16,1,0.3,1);
+        }
+        .arc-proyectado {
+            stroke-dasharray: var(--dash-total);
+            stroke-dashoffset: var(--dash-total);
+            transition: stroke-dashoffset 2.2s cubic-bezier(0.16,1,0.3,1) 0.2s;
+        }
+        .arc-animated .arc-ejecutado,
+        .arc-animated .arc-proyectado {
+            stroke-dashoffset: var(--dash-offset);
+        }
+
+        .progress-fill {
+            width: 0%;
+            transition: width 2s cubic-bezier(0.16,1,0.3,1) 0.4s;
+        }
+        .progress-animated .progress-fill {
+            width: var(--target-width);
+        }
+
+        .shimmer-bg {
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+            background-size: 400px 100%;
+            animation: shimmer 2.5s infinite;
+        }
+
+        .counter {
+            display: inline-block;
+            transition: all 0.1s;
+        }
+
+        /* Molecule dots floating */
+        @keyframes float1 {
+            0%,100% { transform: translate(0,0) scale(1); opacity:0.15; }
+            33%      { transform: translate(8px,-12px) scale(1.2); opacity:0.3; }
+            66%      { transform: translate(-6px,6px) scale(0.9); opacity:0.1; }
+        }
+        @keyframes float2 {
+            0%,100% { transform: translate(0,0) scale(1); opacity:0.1; }
+            50%      { transform: translate(-10px,8px) scale(1.3); opacity:0.25; }
+        }
+        .dot-float-1 { animation: float1 6s ease-in-out infinite; }
+        .dot-float-2 { animation: float2 8s ease-in-out infinite 1s; }
+        .dot-float-3 { animation: float1 7s ease-in-out infinite 2s; }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex h-screen overflow-hidden">
+
+    <!-- ── Sidebar ── -->
+    <aside class="w-64 bg-primary flex flex-col h-full border-r border-primary/10">
+        <div class="px-5 py-4 flex items-center justify-start border-b border-white/10">
+            <img src="logo.png" alt="Solutions & Payroll" class="h-14 w-auto object-contain" />
+        </div>
+        <nav class="flex-1 px-4 space-y-1 mt-4">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="index.html">
+                <span class="material-symbols-outlined text-xl">dashboard</span>
+                <span class="text-sm font-medium">Inicio</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="proyectos.html">
+                <span class="material-symbols-outlined text-xl">sync_alt</span>
+                <span class="text-sm font-medium">Procesos</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="tickets.html">
+                <span class="material-symbols-outlined text-xl">confirmation_number</span>
+                <span class="text-sm font-medium">Tickets</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors" href="ahorros.html">
+                <span class="material-symbols-outlined text-xl">savings</span>
+                <span class="text-sm font-medium">Ahorros</span>
+            </a>
+        </nav>
+        <div class="px-4 py-6 mt-auto border-t border-white/10">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined text-xl">settings</span>
+                <span class="text-sm font-medium">Configuración</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ── Main ── -->
+    <main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark flex flex-col custom-scrollbar">
+        <header class="py-6 px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-10 shrink-0">
+            <div>
+                <h2 class="text-2xl font-black text-primary dark:text-white tracking-tight">Ahorros</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Control de ahorros asociados a procesos.</p>
+            </div>
+            <button id="btn-nuevo-ahorro"
+                class="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-accent/20">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                Registrar Ahorro
+            </button>
+        </header>
+
+        <div class="p-8 space-y-6 max-w-7xl mx-auto w-full">
+
+            <!-- Buscador -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input id="search-ahorros"
+                    class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                    placeholder="Buscar ahorros por proceso, área o estatus..." type="text" />
+            </div>
+
+            <!-- Tabla -->
+            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4">Proceso</th>
+                                <th class="px-6 py-4">Área</th>
+                                <th class="px-6 py-4">Fecha</th>
+                                <th class="px-6 py-4">Monto</th>
+                                <th class="px-6 py-4">Estatus</th>
+                                <th class="px-6 py-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="tbody-ahorros">
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                    <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">savings</span>
+                                    No hay ahorros registrados aún.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Paginación -->
+                <div id="pagination-ahorros" class="hidden flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800">
+                    <span class="text-xs text-slate-500">
+                        Mostrando <span id="pag-start" class="font-bold text-slate-700">0</span>
+                        a <span id="pag-end" class="font-bold text-slate-700">0</span>
+                        de <span id="pag-total" class="font-bold text-slate-700">0</span> registros
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-prev-page"
+                            class="px-3 py-1.5 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">chevron_left</span> Ant
+                        </button>
+                        <button id="btn-next-page"
+                            class="px-3 py-1.5 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1">
+                            Sig <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- SECCIÓN CONSOLIDADO                                         -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <div class="consolidado-section" id="consolidado-section">
+
+                <!-- Título de sección -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                    <div class="flex items-center gap-2 px-4 py-1.5 bg-primary/5 border border-primary/10 rounded-full">
+                        <span class="material-symbols-outlined text-primary text-[18px]">auto_graph</span>
+                        <span class="text-sm font-black text-primary tracking-wide uppercase">Consolidado 2025</span>
+                    </div>
+                    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                </div>
+
+                <!-- Grid principal -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                    <!-- ── Col izq: Tarjetas métricas + barra de progreso ── -->
+                    <div class="lg:col-span-5 flex flex-col gap-4">
+
+                        <!-- Tarjeta Ejecutado -->
+                        <div class="stat-card relative overflow-hidden rounded-2xl bg-primary p-6 text-white shadow-xl shadow-primary/20" style="animation-delay:0.1s">
+                            <!-- Puntos flotantes decorativos -->
+                            <div class="dot-float-1 absolute top-4 right-10 w-20 h-20 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                            <div class="dot-float-2 absolute bottom-2 right-4 w-12 h-12 bg-accent/20 rounded-full blur-lg pointer-events-none"></div>
+                            <div class="shimmer-bg absolute inset-0 pointer-events-none"></div>
+
+                            <div class="relative flex items-start justify-between mb-3">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] font-black uppercase tracking-[0.15em] text-white/50 mb-1">Ahorro Ejecutado</span>
+                                    <span class="text-xs font-semibold text-white/60">Año 2025</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-white text-xl">check_circle</span>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="text-4xl font-black tracking-tight leading-none">
+                                    $<span class="counter" id="counter-ejecutado">0</span>
+                                </div>
+                                <div class="text-xs text-white/40 font-mono mt-1">COP</div>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta Proyectado -->
+                        <div class="stat-card relative overflow-hidden rounded-2xl border-2 border-dashed border-accent/40 bg-white dark:bg-slate-900 p-6 shadow-lg" style="animation-delay:0.25s">
+                            <div class="dot-float-3 absolute top-3 right-8 w-16 h-16 bg-accent/10 rounded-full blur-xl pointer-events-none"></div>
+
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1">Proyección Anual</span>
+                                    <span class="text-xs font-semibold text-slate-400">Al cabo de 1 año</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center" style="animation: pulseGlow 2s ease infinite;">
+                                    <span class="material-symbols-outlined text-accent text-xl">trending_up</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-4xl font-black tracking-tight leading-none text-primary dark:text-white">
+                                    $<span class="counter" id="counter-proyectado">0</span>
+                                </div>
+                                <div class="text-xs text-slate-400 font-mono mt-1">COP</div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de progreso tipo "termómetro" -->
+                        <div class="stat-card rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm" style="animation-delay:0.4s">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-xs font-black uppercase tracking-wider text-slate-500">Avance hacia la meta</span>
+                                <span id="pct-label" class="text-sm font-black text-accent">0%</span>
+                            </div>
+
+                            <!-- Barra principal -->
+                            <div id="progress-container" class="relative h-5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                                <div class="progress-fill h-full rounded-full relative overflow-hidden"
+                                    id="main-progress-bar"
+                                    style="--target-width: 26.2%; background: linear-gradient(90deg, #102a47 0%, #e51148 100%);">
+                                    <div class="shimmer-bg absolute inset-0"></div>
+                                </div>
+                                <!-- Marcador de posición actual -->
+                                <div id="progress-marker" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-accent rounded-full shadow-md transition-all duration-[2s] ease-out"
+                                    style="left: 0%; opacity:0;"></div>
+                            </div>
+
+                            <div class="flex justify-between text-[10px] font-bold text-slate-400 font-mono">
+                                <span>$0</span>
+                                <span id="mid-label">$4.7M</span>
+                                <span>$9.4M</span>
+                            </div>
+
+                            <!-- Desglose -->
+                            <div class="mt-4 space-y-2">
+                                <div class="flex items-center gap-2 text-xs">
+                                    <div class="w-2.5 h-2.5 rounded-sm bg-primary flex-shrink-0"></div>
+                                    <span class="text-slate-500 flex-1">Ejecutado</span>
+                                    <span class="font-bold text-primary dark:text-white font-mono">$2.468.287</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <div class="w-2.5 h-2.5 rounded-sm bg-accent flex-shrink-0"></div>
+                                    <span class="text-slate-500 flex-1">Faltante proyectado</span>
+                                    <span class="font-bold text-accent font-mono">$6.942.269</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Col der: SVG Radial + anillos ── -->
+                    <div class="lg:col-span-7">
+                        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm h-full p-6 flex flex-col">
+
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-xs font-black uppercase tracking-wider text-slate-500">Distribución por anillos</span>
+                                <div class="flex items-center gap-3 text-[10px] font-bold">
+                                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-primary"></span> Ejecutado</span>
+                                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-accent"></span> Proyectado</span>
+                                    <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-slate-200"></span> Pendiente</span>
+                                </div>
+                            </div>
+
+                            <!-- SVG radial chart -->
+                            <div class="flex-1 flex flex-col items-center justify-center relative" id="svg-container">
+                                <svg id="radial-svg" viewBox="0 0 360 300" width="100%" height="100%" style="max-height:320px;">
+                                    <defs>
+                                        <linearGradient id="grad-ejecutado" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#102a47"/>
+                                            <stop offset="100%" stop-color="#1e4d80"/>
+                                        </linearGradient>
+                                        <linearGradient id="grad-proyectado" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#e51148"/>
+                                            <stop offset="100%" stop-color="#ff4d80"/>
+                                        </linearGradient>
+                                        <filter id="glow-blue">
+                                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                        </filter>
+                                        <filter id="glow-red">
+                                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                        </filter>
+                                    </defs>
+
+                                    <!-- Anillo exterior: Proyectado (100%) -->
+                                    <!-- Track -->
+                                    <circle cx="180" cy="155" r="110" fill="none" stroke="#f1f5f9" stroke-width="16"/>
+                                    <!-- Arco proyectado: 100% del círculo -->
+                                    <circle id="arc-proyectado"
+                                        cx="180" cy="155" r="110"
+                                        fill="none"
+                                        stroke="url(#grad-proyectado)"
+                                        stroke-width="16"
+                                        stroke-linecap="round"
+                                        transform="rotate(-90 180 155)"
+                                        style="--dash-total: 691.15; --dash-offset: 0; stroke-dasharray: 691.15; stroke-dashoffset: 691.15;"
+                                        class="arc-proyectado"
+                                        filter="url(#glow-red)"
+                                    />
+
+                                    <!-- Anillo interior: Ejecutado (26.2%) -->
+                                    <!-- Track -->
+                                    <circle cx="180" cy="155" r="78" fill="none" stroke="#f1f5f9" stroke-width="16"/>
+                                    <!-- Arco ejecutado: 26.2% del círculo -->
+                                    <circle id="arc-ejecutado"
+                                        cx="180" cy="155" r="78"
+                                        fill="none"
+                                        stroke="url(#grad-ejecutado)"
+                                        stroke-width="16"
+                                        stroke-linecap="round"
+                                        transform="rotate(-90 180 155)"
+                                        style="--dash-total: 490.09; --dash-offset: 361.53; stroke-dasharray: 490.09; stroke-dashoffset: 490.09;"
+                                        class="arc-ejecutado"
+                                        filter="url(#glow-blue)"
+                                    />
+
+                                    <!-- Centro: texto dinámico -->
+                                    <text x="180" y="142" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="900" font-size="22" fill="#102a47" id="center-pct">26%</text>
+                                    <text x="180" y="162" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="500" font-size="9" fill="#94a3b8" letter-spacing="2">EJECUTADO</text>
+
+                                    <!-- Etiqueta exterior: Proyectado -->
+                                    <text x="180" y="290" text-anchor="middle" font-family="Outfit,sans-serif" font-weight="700" font-size="9" fill="#e51148" letter-spacing="1.5">PROYECCIÓN ANUAL · 100%</text>
+
+                                    <!-- Puntos de referencia en el anillo exterior -->
+                                    <!-- Punto de inicio ejecutado (12 o'clock) -->
+                                    <circle cx="180" cy="45" r="4" fill="#e51148" opacity="0.6"/>
+                                    <!-- Marcador al 26.2% del anillo ejecutado -->
+                                    <circle id="exec-endpoint" cx="180" cy="77" r="5" fill="#102a47"/>
+                                </svg>
+
+                                <!-- Tooltip interactivo al hover -->
+                                <div id="radial-tooltip"
+                                    class="absolute bg-primary text-white text-[10px] font-bold px-3 py-2 rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-10"
+                                    style="top: 20px; right: 20px;">
+                                    <div id="tooltip-content">—</div>
+                                </div>
+                            </div>
+
+                            <!-- Línea de tiempo simplificada -->
+                            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <div class="flex items-center justify-between text-[10px] font-bold uppercase text-slate-400 mb-2 tracking-wider">
+                                    <span>Ene 2025</span>
+                                    <span>Hoy</span>
+                                    <span>Dic 2025</span>
+                                </div>
+                                <div class="relative h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-visible">
+                                    <!-- Progreso de tiempo (mes actual: ~Feb = 2/12 ≈ 16%) -->
+                                    <div class="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/20" style="width:16%"></div>
+                                    <!-- Marcador de ahorro ejecutado en el tiempo -->
+                                    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full shadow" style="left:16%">
+                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">Feb 2025</div>
+                                    </div>
+                                    <!-- Marcador meta -->
+                                    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-accent border-2 border-white rounded-full shadow" style="left:100%">
+                                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-accent text-white text-[9px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">Meta</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- FIN CONSOLIDADO -->
+
+        </div><!-- /p-8 -->
+    </main>
+</div>
+
+<!-- ── Modal: Registrar Ahorro ── -->
+<div id="modal-ahorro" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
+        <button id="modal-close" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <h3 class="text-xl font-black text-primary dark:text-white mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined">savings</span>
+            Registrar Ahorro
+        </h3>
+        <form id="form-ahorro" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Proceso Asociado</label>
+                    <select name="project_id" id="ahorro-project-select" required
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none">
+                        <option value="" disabled selected>Cargando procesos...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Encargado</label>
+                    <input id="ahorro-encargado" type="text" readonly placeholder="Auto-completado"
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-200 dark:bg-slate-700 text-sm cursor-not-allowed opacity-70" />
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Costo Mensual SYP (COP)</label>
+                    <input id="costo_mensual_display" type="text" required placeholder="0"
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                    <input type="hidden" name="costo_mensual" id="costo_mensual_value" value="0">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Costo por Hora (COP)</label>
+                    <input id="costo_hora_display" type="text" readonly placeholder="Calculado"
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-200 dark:bg-slate-700 text-sm font-bold text-primary cursor-not-allowed opacity-70" />
+                    <input type="hidden" name="costo_hora" id="costo_hora_value" value="0">
+                </div>
+            </div>
+            <div class="space-y-3 pt-3 border-t border-slate-200">
+                <h4 class="text-sm font-bold text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">history</span> ANTES
+                </h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Tiempo por Empleado</label>
+                        <input name="tiempo_empleado_antes" id="tiempo_empleado_antes" type="number" step="any" min="0" required
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Tiempo de Gestión</label>
+                        <div class="flex">
+                            <input name="tiempo_gestion_antes" id="tiempo_gestion_antes" type="number" step="any" min="0" required
+                                class="w-full px-3 py-2 border border-slate-200 rounded-l-lg bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                            <select name="tiempo_gestion_antes_tipo" id="tiempo_gestion_antes_tipo"
+                                class="px-2 py-2 border-y border-r border-slate-200 rounded-r-lg bg-slate-100 text-xs focus:outline-none">
+                                <option value="Mensual">Mensual</option>
+                                <option value="Anual">Anual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Total ANTES</label>
+                    <input id="total_antes_display" type="text" readonly placeholder="Calculado"
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-200 text-sm font-bold text-red-600 cursor-not-allowed opacity-70" />
+                    <input type="hidden" name="total_antes" id="total_antes_value" value="0">
+                </div>
+            </div>
+            <div class="space-y-3 pt-3 border-t border-slate-200">
+                <h4 class="text-sm font-bold text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">update</span> ACTUAL
+                </h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Tiempo por Empleado</label>
+                        <input name="tiempo_empleado_actual" id="tiempo_empleado_actual" type="number" step="any" min="0" required
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Tiempo de Gestión</label>
+                        <div class="flex">
+                            <input name="tiempo_gestion_actual" id="tiempo_gestion_actual" type="number" step="any" min="0" required
+                                class="w-full px-3 py-2 border border-slate-200 rounded-l-lg bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                            <select name="tiempo_gestion_actual_tipo" id="tiempo_gestion_actual_tipo"
+                                class="px-2 py-2 border-y border-r border-slate-200 rounded-r-lg bg-slate-100 text-xs focus:outline-none">
+                                <option value="Mensual">Mensual</option>
+                                <option value="Anual">Anual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Total ACTUAL</label>
+                    <input id="total_actual_display" type="text" readonly placeholder="Calculado"
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-200 text-sm font-bold text-emerald-600 cursor-not-allowed opacity-70" />
+                    <input type="hidden" name="total_actual" id="total_actual_value" value="0">
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200 items-end">
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 block mb-1">Fecha</label>
+                    <input name="date" type="date" required
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 block mb-1">Estatus</label>
+                    <select name="status"
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none">
+                        <option>Proyectado</option>
+                        <option>Pendiente</option>
+                        <option>Realizado</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-primary block mb-1">Ahorro</label>
+                    <input id="ahorro_total_display" type="text" readonly placeholder="Calculado"
+                        class="w-full px-3 py-2 border border-accent rounded-lg bg-accent/10 text-sm font-black text-accent cursor-not-allowed focus:outline-none" />
+                    <input type="hidden" name="amount" id="ahorro_total_value" value="0">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-4">
+                <button type="button" id="modal-cancel"
+                    class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit"
+                    class="px-8 py-2.5 bg-accent text-white font-bold rounded-lg hover:bg-accent/90 transition-all shadow-lg shadow-accent/20">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── Modal: Gráfica ── -->
+<div id="modal-chart" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl p-8 relative">
+        <button id="modal-chart-close" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <h3 class="text-xl font-black text-primary dark:text-white mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined">bar_chart</span>
+            Comparativa de Costos: <span id="chart-process-name" class="text-primary font-bold ml-1"></span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="flex flex-col items-center">
+                <h4 class="text-sm font-bold text-slate-500 mb-2">Costos vs Ahorro</h4>
+                <div class="relative w-full h-64"><canvas id="ahorrosChart"></canvas></div>
+            </div>
+            <div class="flex flex-col items-center">
+                <h4 class="text-sm font-bold text-slate-500 mb-2">Proporción (Actual vs Ahorro)</h4>
+                <div class="relative w-full h-64"><canvas id="ahorrosPieChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script>
+    const API = 'http://localhost:3000/api';
+    const fmt = n => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+    const fmtShort = n => {
+        if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1).replace('.', ',') + 'M';
+        if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K';
+        return '$' + n;
+    };
+
+    const statusColor = {
+        'Realizado':  'bg-emerald-100 text-emerald-800',
+        'Pendiente':  'bg-amber-100 text-amber-800',
+        'Proyectado': 'bg-blue-100 text-blue-800',
+    };
+
+    // ── Datos consolidado (estáticos por ahora) ──
+    const EJECUTADO   = 2468287;
+    const PROYECTADO  = 9410556;
+    const PCT_AVANCE  = (EJECUTADO / PROYECTADO * 100).toFixed(1); // 26.2%
+
+    let allAhorros      = [];
+    let allProcesosList = [];
+    let filteredAhorros = [];
+    let currentPage     = 1;
+    const ITEMS_PER_PAGE = 10;
+    let chartInstance    = null;
+    let pieChartInstance = null;
+
+    /* ═══════════════════════════════ TABLA ═══════════════════════════════ */
+    function renderAhorros(data, resetPage = true) {
+        filteredAhorros = data;
+        if (resetPage) currentPage = 1;
+
+        const total    = filteredAhorros.length;
+        const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIdx   = Math.min(startIdx + ITEMS_PER_PAGE, total);
+        const paginated = filteredAhorros.slice(startIdx, endIdx);
+
+        const tbody = document.getElementById('tbody-ahorros');
+        if (!paginated.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400 text-sm">
+                <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">savings</span>
+                No hay ahorros registrados aún.</td></tr>`;
+            updatePaginationUI(0, 0, 0);
+            return;
+        }
+        tbody.innerHTML = paginated.map(s => {
+            const sc = statusColor[s.status] || 'bg-slate-100 text-slate-600';
+            return `<tr class="hover:bg-primary/5 transition-colors cursor-pointer group">
+                <td class="px-6 py-5">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-primary dark:text-white">${s.project_name || ('Proceso #' + s.project_id)}</span>
+                        <span class="text-xs text-slate-400">ID: ${s.project_id}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-5 text-sm font-medium">${s.project_area || '—'}</td>
+                <td class="px-6 py-5 text-sm text-slate-500">${s.date || '—'}</td>
+                <td class="px-6 py-5 text-sm font-bold text-primary dark:text-white">${fmt(s.amount)}</td>
+                <td class="px-6 py-5">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${s.status}</span>
+                </td>
+                <td class="px-6 py-5 text-right">
+                    <div class="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick='openChartModal(${JSON.stringify(s).replace(/'/g,"&#39;")})' title="Visualizar Gráfica"
+                            class="p-2 hover:bg-blue-50 rounded-lg text-slate-400 hover:text-blue-500 transition-colors">
+                            <span class="material-symbols-outlined">bar_chart</span>
+                        </button>
+                        <button onclick="deleteAhorro(${s.id})" title="Eliminar"
+                            class="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+
+        updatePaginationUI(startIdx + 1, endIdx, total);
+    }
+
+    function updatePaginationUI(start, end, total) {
+        const container = document.getElementById('pagination-ahorros');
+        if (total === 0) { container.classList.add('hidden'); return; }
+        container.classList.remove('hidden');
+        document.getElementById('pag-start').textContent = start;
+        document.getElementById('pag-end').textContent   = end;
+        document.getElementById('pag-total').textContent = total;
+        document.getElementById('btn-prev-page').disabled = currentPage === 1;
+        document.getElementById('btn-next-page').disabled = currentPage * ITEMS_PER_PAGE >= total;
+    }
+
+    document.getElementById('btn-prev-page').onclick = () => {
+        if (currentPage > 1) { currentPage--; renderAhorros(filteredAhorros, false); }
+    };
+    document.getElementById('btn-next-page').onclick = () => {
+        if (currentPage * ITEMS_PER_PAGE < filteredAhorros.length) { currentPage++; renderAhorros(filteredAhorros, false); }
+    };
+
+    async function loadAhorros() {
+        try {
+            const data = await fetch(`${API}/ahorros`).then(r => r.json());
+            allAhorros = Array.isArray(data) ? data : [];
+            renderAhorros(allAhorros);
+        } catch (e) { console.warn('Backend no disponible.'); }
+    }
+
+    async function deleteAhorro(id) {
+        if (!confirm('¿Eliminar este registro de ahorro?')) return;
+        await fetch(`${API}/ahorros/${id}`, { method: 'DELETE' });
+        loadAhorros();
+    }
+
+    /* ══════════════════ CARGA SELECT PROCESOS ══════════════════════════ */
+    async function loadProcesosForSelect() {
+        try {
+            const procesos = await fetch(`${API}/proyectos`).then(r => r.json());
+            allProcesosList = procesos;
+            const select = document.getElementById('ahorro-project-select');
+            const finalizados = procesos.filter(p => p.status === 'Finalizado');
+            if (!finalizados.length) {
+                select.innerHTML = '<option value="" disabled selected>No hay procesos finalizados disponibles</option>';
+                return;
+            }
+            select.innerHTML = '<option value="" disabled selected>Selecciona un proceso...</option>' +
+                finalizados.map(p => `<option value="${p.id}">#${p.id} - ${p.name}</option>`).join('');
+        } catch (e) { console.warn('Error cargando procesos para el select.'); }
+    }
+
+    /* ══════════════════ BUSCADOR ═══════════════════════════════════════ */
+    document.getElementById('search-ahorros').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        const filtered = allAhorros.filter(s =>
+            (s.project_name || '').toLowerCase().includes(q) ||
+            (s.project_area || '').toLowerCase().includes(q) ||
+            (s.status || '').toLowerCase().includes(q)
+        );
+        renderAhorros(filtered);
+    });
+
+    /* ══════════════════ MODAL AHORRO ═══════════════════════════════════ */
+    const modal = document.getElementById('modal-ahorro');
+    document.getElementById('btn-nuevo-ahorro').onclick = () => modal.classList.remove('hidden');
+    document.getElementById('modal-close').onclick      = () => modal.classList.add('hidden');
+    document.getElementById('modal-cancel').onclick     = () => modal.classList.add('hidden');
+
+    document.getElementById('form-ahorro').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd   = new FormData(e.target);
+        const body = Object.fromEntries(fd.entries());
+        body.project_id           = parseInt(body.project_id);
+        body.amount               = parseFloat(body.amount) || 0;
+        body.costo_mensual        = parseFloat(body.costo_mensual) || 0;
+        body.costo_hora           = parseFloat(body.costo_hora) || 0;
+        body.tiempo_empleado_antes  = parseFloat(body.tiempo_empleado_antes) || 0;
+        body.tiempo_empleado_actual = parseFloat(body.tiempo_empleado_actual) || 0;
+        body.tiempo_gestion_antes   = parseFloat(body.tiempo_gestion_antes) || 0;
+        body.tiempo_gestion_actual  = parseFloat(body.tiempo_gestion_actual) || 0;
+        body.total_antes  = parseFloat(body.total_antes) || 0;
+        body.total_actual = parseFloat(body.total_actual) || 0;
+
+        await fetch(`${API}/ahorros`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        modal.classList.add('hidden');
+        e.target.reset();
+        ['costo_mensual_display','ahorro-encargado','total_antes_display','total_actual_display','costo_hora_display','ahorro_total_display']
+            .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        loadAhorros();
+    };
+
+    /* ── Cálculos dinámicos modal ── */
+    function formatNoDecimals(n) {
+        return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(n);
+    }
+    function calculateAhorros() {
+        const raw = document.getElementById('costo_mensual_display').value.replace(/\./g,'').replace(/,/g,'');
+        const costoMensual = parseFloat(raw) || 0;
+        document.getElementById('costo_mensual_value').value = costoMensual;
+        if (raw && !isNaN(costoMensual)) {
+            document.getElementById('costo_mensual_display').value = costoMensual ? formatNoDecimals(costoMensual) : '';
+        }
+        const costoHora = costoMensual / 180;
+        document.getElementById('costo_hora_value').value = costoHora;
+        document.getElementById('costo_hora_display').value = fmt(costoHora);
+
+        const tgAntes   = parseFloat(document.getElementById('tiempo_gestion_antes').value) || 0;
+        const multAntes = document.getElementById('tiempo_gestion_antes_tipo').value === 'Mensual' ? 12 : 1;
+        const totalAntes = tgAntes * costoHora * multAntes;
+        document.getElementById('total_antes_value').value   = totalAntes;
+        document.getElementById('total_antes_display').value = fmt(totalAntes);
+
+        const tgActual   = parseFloat(document.getElementById('tiempo_gestion_actual').value) || 0;
+        const multActual = document.getElementById('tiempo_gestion_actual_tipo').value === 'Mensual' ? 12 : 1;
+        const totalActual = tgActual * costoHora * multActual;
+        document.getElementById('total_actual_value').value   = totalActual;
+        document.getElementById('total_actual_display').value = fmt(totalActual);
+
+        const ahorro = totalAntes - totalActual;
+        document.getElementById('ahorro_total_value').value   = ahorro;
+        document.getElementById('ahorro_total_display').value = fmt(ahorro);
+    }
+
+    ['costo_mensual_display','tiempo_gestion_antes','tiempo_gestion_actual',
+     'tiempo_gestion_antes_tipo','tiempo_gestion_actual_tipo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.addEventListener('input', calculateAhorros); el.addEventListener('change', calculateAhorros); }
+    });
+
+    document.getElementById('ahorro-project-select').addEventListener('change', function () {
+        const pid = parseInt(this.value);
+        const p   = allProcesosList.find(x => x.id === pid);
+        document.getElementById('ahorro-encargado').value = p ? (p.encargado || '') : '';
+    });
+
+    /* ══════════════════ MODAL CHART ════════════════════════════════════ */
+    const modalChart = document.getElementById('modal-chart');
+    document.getElementById('modal-chart-close').onclick = () => modalChart.classList.add('hidden');
+
+    function openChartModal(saving) {
+        document.getElementById('chart-process-name').textContent = saving.project_name || ('Proceso #' + saving.project_id);
+        modalChart.classList.remove('hidden');
+        const ctxBar = document.getElementById('ahorrosChart').getContext('2d');
+        const ctxPie = document.getElementById('ahorrosPieChart').getContext('2d');
+        if (chartInstance)    chartInstance.destroy();
+        if (pieChartInstance) pieChartInstance.destroy();
+
+        const commonTooltip = {
+            callbacks: {
+                label: ctx => {
+                    let label = ctx.dataset.label || ctx.label || '';
+                    if (label) label += ': ';
+                    return label + fmt(ctx.parsed.y !== undefined ? ctx.parsed.y : ctx.parsed);
+                }
+            }
+        };
+
+        chartInstance = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['ANTES', 'ACTUAL', 'AHORRO'],
+                datasets: [{ label: 'COP ($)', data: [saving.total_antes, saving.total_actual, saving.amount],
+                    backgroundColor: ['rgba(16,42,71,0.9)','rgba(16,87,136,0.9)','rgba(229,17,72,0.9)'], borderRadius: 6 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: commonTooltip },
+                scales: { y: { beginAtZero: true, ticks: { callback: v => fmtShort(v) } } }
+            }
+        });
+
+        pieChartInstance = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: ['Total Actual', 'Ahorro Logrado'],
+                datasets: [{ data: [saving.total_actual, saving.amount],
+                    backgroundColor: ['rgba(16,87,136,0.9)','rgba(229,17,72,0.9)'], hoverOffset: 4, borderWidth: 2 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
+                plugins: { tooltip: commonTooltip, legend: { position: 'bottom' } } }
+        });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════ */
+    /* CONSOLIDADO – Animaciones                                            */
+    /* ═══════════════════════════════════════════════════════════════════ */
+
+    function animateCounter(el, from, to, duration, formatter) {
+        const startTime = performance.now();
+        function step(now) {
+            const elapsed  = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(from + (to - from) * eased);
+            el.textContent = formatter(current);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    function formatCOP(n) {
+        return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(n);
+    }
+
+    let consolidadoAnimated = false;
+
+    function triggerConsolidadoAnimation() {
+        if (consolidadoAnimated) return;
+        consolidadoAnimated = true;
+
+        const section = document.getElementById('consolidado-section');
+        section.classList.add('visible');
+
+        // Animar tarjetas
+        document.querySelectorAll('.stat-card').forEach((card, i) => {
+            card.style.animationDelay = `${0.1 + i * 0.15}s`;
+            card.style.animationFillMode = 'forwards';
+        });
+
+        // Animar contadores
+        setTimeout(() => {
+            animateCounter(document.getElementById('counter-ejecutado'),   0, EJECUTADO,  2000, formatCOP);
+            animateCounter(document.getElementById('counter-proyectado'),  0, PROYECTADO, 2500, formatCOP);
+        }, 200);
+
+        // Animar porcentaje en etiqueta
+        setTimeout(() => {
+            const pctEl = document.getElementById('pct-label');
+            let current = 0;
+            const target = parseFloat(PCT_AVANCE);
+            const interval = setInterval(() => {
+                current += 0.5;
+                if (current >= target) { current = target; clearInterval(interval); }
+                pctEl.textContent = current.toFixed(1) + '%';
+            }, 30);
+        }, 400);
+
+        // Animar barra de progreso
+        setTimeout(() => {
+            const container = document.getElementById('main-progress-bar').parentElement;
+            container.classList.add('progress-animated');
+            const marker = document.getElementById('progress-marker');
+            marker.style.left  = PCT_AVANCE + '%';
+            marker.style.opacity = '1';
+        }, 500);
+
+        // Animar arcos SVG
+        setTimeout(() => {
+            // Proyectado: 100% del arco exterior (r=110, circumference≈691.15)
+            const arcProy = document.getElementById('arc-proyectado');
+            arcProy.style.strokeDashoffset = '0';
+
+            // Ejecutado: 26.2% del arco interior (r=78, circumference≈490.09)
+            const pct  = EJECUTADO / PROYECTADO; // 0.262
+            const circ = 490.09;
+            const arcExec = document.getElementById('arc-ejecutado');
+            arcExec.style.strokeDashoffset = String(circ * (1 - pct));
+
+            // Actualizar texto central con animación de porcentaje
+            const centerPct = document.getElementById('center-pct');
+            let c = 0;
+            const iv = setInterval(() => {
+                c += 0.5;
+                if (c >= parseFloat(PCT_AVANCE)) { c = parseFloat(PCT_AVANCE); clearInterval(iv); }
+                centerPct.textContent = Math.round(c) + '%';
+            }, 40);
+
+            // Posicionar punto final del arco ejecutado
+            const angle = (-90 + pct * 360) * (Math.PI / 180);
+            const r = 78, cx = 180, cy = 155;
+            const ex = cx + r * Math.cos(angle);
+            const ey = cy + r * Math.sin(angle);
+            const ep = document.getElementById('exec-endpoint');
+            setTimeout(() => {
+                ep.setAttribute('cx', ex.toFixed(1));
+                ep.setAttribute('cy', ey.toFixed(1));
+            }, 1800);
+        }, 700);
+    }
+
+    // Hover interactivo en SVG
+    document.getElementById('arc-ejecutado').addEventListener('mouseenter', () => {
+        const tooltip = document.getElementById('radial-tooltip');
+        document.getElementById('tooltip-content').innerHTML =
+            `<div>Ejecutado 2025</div><div class="text-blue-200 mt-0.5">${fmt(EJECUTADO)} · ${PCT_AVANCE}%</div>`;
+        tooltip.style.opacity = '1';
+    });
+    document.getElementById('arc-ejecutado').addEventListener('mouseleave', () => {
+        document.getElementById('radial-tooltip').style.opacity = '0';
+    });
+    document.getElementById('arc-proyectado').addEventListener('mouseenter', () => {
+        const tooltip = document.getElementById('radial-tooltip');
+        document.getElementById('tooltip-content').innerHTML =
+            `<div>Proyección Anual</div><div class="text-red-200 mt-0.5">${fmt(PROYECTADO)} · 100%</div>`;
+        tooltip.style.opacity = '1';
+    });
+    document.getElementById('arc-proyectado').addEventListener('mouseleave', () => {
+        document.getElementById('radial-tooltip').style.opacity = '0';
+    });
+
+    // IntersectionObserver para disparar cuando sea visible
+    const observer = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+            triggerConsolidadoAnimation();
+            observer.disconnect();
+        }
+    }, { threshold: 0.2 });
+    observer.observe(document.getElementById('consolidado-section'));
+
+    /* ══════════════════ INIT ═══════════════════════════════════════════ */
+    loadAhorros();
+    loadProcesosForSelect();
+</script>
+</body>
+</html>

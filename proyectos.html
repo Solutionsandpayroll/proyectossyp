@@ -1,0 +1,725 @@
+<!-- Toast de confirmación -->
+<div id="toast-estado" class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg font-bold text-sm opacity-0 pointer-events-none transition-all duration-300">Estado actualizado correctamente</div>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Procesos – S&P Gestión</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#102a47",
+                        "accent": "#e51148",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13191f",
+                    },
+                    fontFamily: { "display": ["Outfit", "sans-serif"] },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        html { font-size: 110%; }
+        body { font-family: 'Outfit', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .table-row-hover:hover { background-color: rgba(16, 42, 71, 0.03); }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="flex h-screen overflow-hidden">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="w-64 bg-primary flex flex-col h-full border-r border-primary/10">
+        <div class="px-5 py-4 flex items-center justify-start border-b border-white/10">
+            <img src="logo.png" alt="Solutions & Payroll" class="h-14 w-auto object-contain" />
+        </div>
+        <nav class="flex-1 px-4 space-y-1 mt-4">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="index.html">
+                <span class="material-symbols-outlined text-xl">dashboard</span>
+                <span class="text-sm font-medium">Inicio</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors" href="proyectos.html">
+                <span class="material-symbols-outlined text-xl">sync_alt</span>
+                <span class="text-sm font-medium">Procesos</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="tickets.html">
+                <span class="material-symbols-outlined text-xl">confirmation_number</span>
+                <span class="text-sm font-medium">Tickets</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="ahorros.html">
+                <span class="material-symbols-outlined text-xl">savings</span>
+                <span class="text-sm font-medium">Ahorros</span>
+            </a>
+        </nav>
+        <div class="px-4 py-6 mt-auto border-t border-white/10">
+            <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined text-xl">settings</span>
+                <span class="text-sm font-medium">Configuración</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- ═══ CONTENIDO PRINCIPAL ═══ -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-background-light dark:bg-background-dark">
+
+        <!-- Header -->
+        <header class="py-6 px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-10 shrink-0">
+            <div>
+                <h2 class="text-2xl font-black text-primary dark:text-white tracking-tight">Procesos</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestión de procesos operativos activos.</p>
+            </div>
+            <button id="btn-nuevo-proceso"
+                class="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-lg shadow-accent/20">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                Nuevo Proceso
+            </button>
+        </header>
+
+        <!-- Contenido scrollable -->
+        <div class="flex-1 overflow-auto p-8 custom-scrollbar">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- Buscador -->
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                    <input id="search-procesos"
+                        class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                        placeholder="Buscar por nombre, área, encargado o responsable..."
+                        type="text" />
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Área</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Encargado</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Responsable</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Proceso</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estatus</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">% Avance</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="tbody-procesos">
+                                <!-- Filas generadas por JS -->
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                        <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">sync_alt</span>
+                                        No hay procesos registrados aún.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Paginación -->
+                        <div id="pagination-procesos" class="hidden flex items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800">
+                            <span class="text-xs text-slate-500">
+                                Mostrando <span id="pag-start" class="font-bold text-slate-700 dark:text-slate-300">0</span>
+                                a <span id="pag-end" class="font-bold text-slate-700 dark:text-slate-300">0</span>
+                                de <span id="pag-total" class="font-bold text-slate-700 dark:text-slate-300">0</span> procesos
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-prev-page"
+                                    class="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">chevron_left</span> Ant
+                                </button>
+                                <button id="btn-next-page"
+                                    class="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1">
+                                    Sig <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ═══ MODAL: NUEVO / EDITAR PROCESO ═══ -->
+<div id="modal-proceso" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
+        <button id="modal-close" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <h3 id="modal-proceso-title" class="text-xl font-black text-primary dark:text-white mb-6">Nuevo Proceso</h3>
+        <form id="form-proceso" class="space-y-4">
+            <input type="hidden" id="edit-proceso-id" value="" />
+            <div>
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Área</label>
+                <input name="area" required
+                    class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Encargado</label>
+                <input name="encargado" required
+                    class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Responsable</label>
+                <input name="leader" required
+                    class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Nombre del Proceso</label>
+                <input name="name" required
+                    class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+            </div>
+            <div>
+                <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Estatus</label>
+                <select name="status"
+                    class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none">
+                    <option>En Progreso</option>
+                    <option>En Revisión</option>
+                    <option>Ejecución</option>
+                    <option>En Pruebas</option>
+                    <option>Completado</option>
+                    <option>En Pausa</option>
+                    <option>Cancelado</option>
+                    <option>Finalizado</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" id="modal-cancel"
+                    class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit"
+                    class="px-8 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══ MODAL: REGISTRAR AVANCE ═══ -->
+<div id="modal-avances" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
+        <button id="modal-avances-close" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <h3 class="text-xl font-black text-primary dark:text-white mb-1 flex items-center gap-2">
+            <span class="material-symbols-outlined">add_task</span>
+            Registrar Avance
+        </h3>
+        <p id="avances-proceso-name" class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-6 truncate"></p>
+        <form id="form-avance" class="space-y-4">
+            <input type="hidden" name="project_id" id="avance-project-id" />
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Fecha</label>
+                    <input name="date" type="date" required
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">% Avance</label>
+                    <input name="progress" type="number" min="0" max="100" required
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Descripción</label>
+                <textarea name="description" rows="3" required placeholder="¿Qué se avanzó?"
+                    class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" id="modal-avances-cancel"
+                    class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit"
+                    class="px-5 py-2.5 bg-accent text-white font-bold rounded-lg hover:bg-accent/90 transition-all shadow-lg shadow-accent/20">Guardar Avance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast-estado" class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg font-bold text-sm opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
+    <span class="material-symbols-outlined text-lg">check_circle</span>
+    Estado actualizado correctamente
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                                         -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<script>
+    /* ─── Configuración base ─────────────────────────────────────────── */
+    const API = 'http://localhost:3000/api';
+    const ITEMS_PER_PAGE = 10;
+
+    const STATUS_COLORS = {
+        'En Progreso':  'bg-blue-50 text-blue-600',
+        'Completado':   'bg-emerald-50 text-emerald-600',
+        'Finalizado':   'bg-emerald-50 text-emerald-700',
+        'En Revisión':  'bg-amber-50 text-amber-600',
+        'Ejecución':    'bg-indigo-50 text-indigo-600',
+        'En Pruebas':   'bg-purple-50 text-purple-600',
+        'En Pausa':     'bg-slate-50 text-slate-500',
+        'Cancelado':    'bg-red-50 text-red-600',
+    };
+
+    const STATUS_OPTIONS = ['En Progreso', 'En Revisión', 'Ejecución', 'En Pruebas', 'Completado', 'Finalizado', 'En Pausa', 'Cancelado'];
+
+    /* ─── Estado global ──────────────────────────────────────────────── */
+    let allProcesos = [];
+    let filteredProcesos = [];
+    let openAdvancesRows = new Set();
+    let currentPage = 1;
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* RENDER TABLA                                                        */
+    /* ══════════════════════════════════════════════════════════════════ */
+    function renderProcesos(data, resetPage = true) {
+        filteredProcesos = data;
+        if (resetPage) currentPage = 1;
+
+        const total    = filteredProcesos.length;
+        const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIdx   = Math.min(startIdx + ITEMS_PER_PAGE, total);
+        const paginated = filteredProcesos.slice(startIdx, endIdx);
+
+        const tbody = document.getElementById('tbody-procesos');
+
+        if (!paginated.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                        <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">sync_alt</span>
+                        No hay procesos registrados aún.
+                    </td>
+                </tr>`;
+            updatePaginationUI(0, 0, 0);
+            return;
+        }
+
+        tbody.innerHTML = paginated.map(p => buildProcesoRows(p)).join('');
+
+        // Cargar historial de filas ya abiertas
+        openAdvancesRows.forEach(id => {
+            if (document.getElementById(`avances-row-${id}`)) {
+                loadAvancesListFor(id);
+            }
+        });
+
+        updatePaginationUI(startIdx + 1, endIdx, total);
+    }
+
+    /* ─── Construir HTML de fila ──────────────────────────────────────── */
+    function buildProcesoRows(p) {
+        const cls     = STATUS_COLORS[p.status] || 'bg-slate-50 text-slate-500';
+        const pct     = Math.min(Math.max(parseInt(p.progress) || 0, 0), 100);
+        const isOpen  = openAdvancesRows.has(p.id);
+        const name    = escapeAttr(p.name);
+
+        /* Selector de estado */
+        const optionsHtml = STATUS_OPTIONS.map(opt =>
+            `<option value="${opt}" ${p.status === opt ? 'selected' : ''}>${opt}</option>`
+        ).join('');
+
+        const estadoSelect = `
+            <select
+                class="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold ${cls}"
+                data-proceso-id="${p.id}"
+                onchange="cambiarEstado(${p.id}, this.value)">
+                ${optionsHtml}
+            </select>`;
+
+        /* Barra de progreso con color dinámico */
+        const barColor = pct >= 100 ? 'bg-emerald-500' : pct >= 60 ? 'bg-blue-500' : pct >= 30 ? 'bg-amber-400' : 'bg-slate-400';
+
+        /* Fila principal */
+        const mainRow = `
+            <tr id="row-${p.id}" class="table-row-hover transition-colors ${isOpen ? 'bg-slate-50/50 dark:bg-slate-800/30' : ''}">
+                <td class="px-6 py-5 text-sm font-medium text-slate-600 dark:text-slate-300">${p.area}</td>
+                <td class="px-6 py-5 text-sm text-slate-500">${p.encargado || '—'}</td>
+                <td class="px-6 py-5 text-sm font-semibold">${p.leader}</td>
+                <td class="px-6 py-5">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-primary dark:text-slate-200">${p.name}</span>
+                        <span class="text-[10px] text-slate-400 font-mono">ID: ${p.id}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-5">${estadoSelect}</td>
+                <td class="px-6 py-5">
+                    <div class="flex items-center gap-3 min-w-[120px]">
+                        <div class="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="${barColor} h-full rounded-full transition-all duration-500" style="width:${pct}%"></div>
+                        </div>
+                        <span class="text-xs font-bold font-mono">${pct}%</span>
+                    </div>
+                </td>
+                <td class="px-6 py-5 text-right">
+                    <div class="flex items-center justify-end gap-1">
+                        <button onclick="openEditProcesoModal(${p.id})" title="Editar Proceso"
+                            class="p-2 bg-blue-600 text-white rounded-lg font-bold text-xs hover:bg-blue-700 transition-all">
+                            Editar
+                        </button>
+                        <button onclick="toggleAvances(${p.id})" title="Ver Historial de Avances"
+                            class="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg text-slate-400 hover:text-blue-500 transition-colors">
+                            <span id="icon-toggle-${p.id}" class="material-symbols-outlined text-xl">
+                                ${isOpen ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}
+                            </span>
+                        </button>
+                        <button onclick="openAvancesModal(${p.id}, '${name}', ${pct})" title="Registrar Avance"
+                            class="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-slate-400 hover:text-emerald-500 transition-colors">
+                            <span class="material-symbols-outlined text-xl">add_task</span>
+                        </button>
+                        <button onclick="deleteProceso(${p.id})" title="Eliminar Proceso"
+                            class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                            <span class="material-symbols-outlined text-xl">delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>`;
+
+        /* Fila de avances (expandible) */
+        const avancesRow = `
+            <tr id="avances-row-${p.id}" class="${isOpen ? '' : 'hidden'}">
+                <td colspan="7" class="p-0 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 shadow-inner">
+                    <div class="p-6 w-full max-w-4xl mx-auto">
+                        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">history</span>
+                            Historial de Avances
+                        </h4>
+                        <div id="list-avances-${p.id}" class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                            <div class="text-xs text-slate-400 flex items-center gap-2">
+                                <span class="material-symbols-outlined animate-spin text-sm">sync</span>
+                                Cargando...
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+
+        return mainRow + avancesRow;
+    }
+
+    /* ─── Paginación ──────────────────────────────────────────────────── */
+    function updatePaginationUI(start, end, total) {
+        const container = document.getElementById('pagination-procesos');
+        if (total === 0) { container.classList.add('hidden'); return; }
+        container.classList.remove('hidden');
+        document.getElementById('pag-start').textContent = start;
+        document.getElementById('pag-end').textContent   = end;
+        document.getElementById('pag-total').textContent = total;
+        document.getElementById('btn-prev-page').disabled = currentPage === 1;
+        document.getElementById('btn-next-page').disabled = currentPage * ITEMS_PER_PAGE >= total;
+    }
+
+    document.getElementById('btn-prev-page').onclick = () => {
+        if (currentPage > 1) { currentPage--; renderProcesos(filteredProcesos, false); }
+    };
+    document.getElementById('btn-next-page').onclick = () => {
+        if (currentPage * ITEMS_PER_PAGE < filteredProcesos.length) { currentPage++; renderProcesos(filteredProcesos, false); }
+    };
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* CARGA DE PROCESOS                                                   */
+    /* ══════════════════════════════════════════════════════════════════ */
+    async function loadProcesos() {
+        showLoadingState();
+        try {
+            const res = await fetch(`${API}/proyectos`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            allProcesos = Array.isArray(data) ? data : [];
+            renderProcesos(allProcesos);
+        } catch (e) {
+            console.error('Error cargando procesos:', e);
+            showErrorState();
+        }
+    }
+
+    function showLoadingState() {
+        document.getElementById('tbody-procesos').innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                    <span class="material-symbols-outlined text-3xl animate-spin block mb-2 text-slate-300">sync</span>
+                    Cargando procesos...
+                </td>
+            </tr>`;
+    }
+
+    function showErrorState() {
+        document.getElementById('tbody-procesos').innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
+                    <span class="material-symbols-outlined text-4xl block mb-2 text-red-300">error</span>
+                    No se pudo conectar al servidor. Verifica que el backend esté corriendo en <span class="font-mono text-xs">localhost:3000</span>.
+                </td>
+            </tr>`;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* CRUD PROCESOS                                                       */
+    /* ══════════════════════════════════════════════════════════════════ */
+
+    /* Cambiar estado inline */
+    async function cambiarEstado(id, nuevoEstado) {
+        const proceso = allProcesos.find(p => p.id === id);
+        if (!proceso) return;
+        const body = { ...proceso, status: nuevoEstado };
+        try {
+            const res = await fetch(`${API}/proyectos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error('Error en backend');
+            proceso.status = nuevoEstado;
+            // Actualizar color del select sin re-renderizar toda la tabla
+            const select = document.querySelector(`select[data-proceso-id="${id}"]`);
+            if (select) {
+                const cls = STATUS_COLORS[nuevoEstado] || 'bg-slate-50 text-slate-500';
+                select.className = `px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold ${cls}`;
+            }
+            mostrarToast();
+        } catch (e) {
+            console.error('Error actualizando estado:', e);
+            alert('Error al actualizar el estado. Intenta de nuevo.');
+            // Revertir visualmente
+            await loadProcesos();
+        }
+    }
+
+    /* Eliminar proceso */
+    async function deleteProceso(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este proceso?')) return;
+        try {
+            const res = await fetch(`${API}/proyectos/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Error al eliminar');
+            openAdvancesRows.delete(id);
+            await loadProcesos();
+        } catch (e) {
+            alert('Error al eliminar el proceso.');
+        }
+    }
+
+    /* Modal Nuevo Proceso */
+    document.getElementById('btn-nuevo-proceso').onclick = () => {
+        document.getElementById('modal-proceso-title').textContent = 'Nuevo Proceso';
+        document.getElementById('edit-proceso-id').value = '';
+        document.getElementById('form-proceso').reset();
+        document.getElementById('modal-proceso').classList.remove('hidden');
+    };
+    document.getElementById('modal-close').onclick   = cerrarModalProceso;
+    document.getElementById('modal-cancel').onclick  = cerrarModalProceso;
+    function cerrarModalProceso() {
+        document.getElementById('modal-proceso').classList.add('hidden');
+        document.getElementById('edit-proceso-id').value = '';
+        document.getElementById('form-proceso').reset();
+    }
+
+    /* Modal Editar Proceso */
+    function openEditProcesoModal(id) {
+        const proceso = allProcesos.find(p => p.id === id);
+        if (!proceso) return;
+        document.getElementById('modal-proceso-title').textContent = 'Editar Proceso';
+        document.getElementById('edit-proceso-id').value = id;
+        const form = document.getElementById('form-proceso');
+        form.elements['area'].value      = proceso.area      || '';
+        form.elements['encargado'].value = proceso.encargado || '';
+        form.elements['leader'].value    = proceso.leader    || '';
+        form.elements['name'].value      = proceso.name      || '';
+        form.elements['status'].value    = proceso.status    || 'En Progreso';
+        document.getElementById('modal-proceso').classList.remove('hidden');
+    }
+
+    /* Submit form Proceso */
+    document.getElementById('form-proceso').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd     = new FormData(e.target);
+        const body   = Object.fromEntries(fd.entries());
+        const editId = document.getElementById('edit-proceso-id').value;
+
+        try {
+            if (editId) {
+                const res = await fetch(`${API}/proyectos/${editId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('Error al actualizar');
+            } else {
+                const res = await fetch(`${API}/proyectos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('Error al crear');
+            }
+            cerrarModalProceso();
+            await loadProcesos();
+        } catch (err) {
+            alert('Error al guardar el proceso. Verifica la conexión con el servidor.');
+            console.error(err);
+        }
+    };
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* AVANCES                                                             */
+    /* ══════════════════════════════════════════════════════════════════ */
+
+    /* Modal Registrar Avance */
+    document.getElementById('modal-avances-close').onclick  = cerrarModalAvances;
+    document.getElementById('modal-avances-cancel').onclick = cerrarModalAvances;
+    function cerrarModalAvances() {
+        document.getElementById('modal-avances').classList.add('hidden');
+    }
+
+    function openAvancesModal(projectId, projectName, currentProgress) {
+        document.getElementById('avance-project-id').value          = projectId;
+        document.getElementById('avances-proceso-name').textContent = projectName;
+        const form = document.getElementById('form-avance');
+        form.reset();
+        form.elements['date'].value     = new Date().toISOString().split('T')[0];
+        form.elements['progress'].value = currentProgress;
+        document.getElementById('modal-avances').classList.remove('hidden');
+    }
+
+    document.getElementById('form-avance').onsubmit = async (e) => {
+        e.preventDefault();
+        const fd        = new FormData(e.target);
+        const projectId = fd.get('project_id');
+        const body      = Object.fromEntries(fd.entries());
+
+        try {
+            const res = await fetch(`${API}/proyectos/${projectId}/avances`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error('Error al guardar avance');
+            cerrarModalAvances();
+            await loadProcesos();
+        } catch (err) {
+            alert('Error al registrar el avance.');
+            console.error(err);
+        }
+    };
+
+    /* Toggle historial de avances */
+    async function toggleAvances(projectId) {
+        const row  = document.getElementById(`avances-row-${projectId}`);
+        const icon = document.getElementById(`icon-toggle-${projectId}`);
+        const mainRow = document.getElementById(`row-${projectId}`);
+
+        if (openAdvancesRows.has(projectId)) {
+            openAdvancesRows.delete(projectId);
+            row.classList.add('hidden');
+            icon.textContent = 'keyboard_arrow_down';
+            mainRow.classList.remove('bg-slate-50/50', 'dark:bg-slate-800/30');
+        } else {
+            openAdvancesRows.add(projectId);
+            row.classList.remove('hidden');
+            icon.textContent = 'keyboard_arrow_up';
+            mainRow.classList.add('bg-slate-50/50', 'dark:bg-slate-800/30');
+            await loadAvancesListFor(projectId);
+        }
+    }
+
+    /* Cargar historial de avances */
+    async function loadAvancesListFor(projectId) {
+        const list = document.getElementById(`list-avances-${projectId}`);
+        if (!list) return;
+        list.innerHTML = `<div class="text-xs text-slate-400 flex items-center gap-2"><span class="material-symbols-outlined animate-spin text-sm">sync</span> Cargando...</div>`;
+        try {
+            const res  = await fetch(`${API}/proyectos/${projectId}/avances`);
+            if (!res.ok) throw new Error('Error al obtener avances');
+            const data = await res.json();
+
+            if (!data.length) {
+                list.innerHTML = `<div class="text-center text-xs text-slate-400 py-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">No hay avances registrados para este proceso.</div>`;
+                return;
+            }
+
+            list.innerHTML = data.map(a => `
+                <div class="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-1 relative group">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">${a.date}</span>
+                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">Avance: ${a.progress}%</span>
+                    </div>
+                    <p class="text-xs text-slate-700 dark:text-slate-300 pr-6">${a.description}</p>
+                    <button onclick="deleteAvance(${a.id}, ${projectId})" title="Eliminar Avance"
+                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                </div>
+            `).join('');
+        } catch (e) {
+            list.innerHTML = `<div class="text-center text-xs text-red-500 py-3">Error al cargar historial.</div>`;
+            console.error(e);
+        }
+    }
+
+    /* Eliminar avance */
+    async function deleteAvance(avanceId, projectId) {
+        if (!confirm('¿Eliminar este avance?')) return;
+        try {
+            await fetch(`${API}/avances/${avanceId}`, { method: 'DELETE' });
+            await loadProcesos();
+        } catch (e) {
+            alert('Error al eliminar el avance.');
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* BUSCADOR                                                            */
+    /* ══════════════════════════════════════════════════════════════════ */
+    document.getElementById('search-procesos').addEventListener('input', function () {
+        const q = this.value.toLowerCase().trim();
+        if (!q) { renderProcesos(allProcesos); return; }
+        const filtered = allProcesos.filter(p =>
+            p.name.toLowerCase().includes(q)           ||
+            p.area.toLowerCase().includes(q)           ||
+            p.leader.toLowerCase().includes(q)         ||
+            (p.encargado && p.encargado.toLowerCase().includes(q))
+        );
+        renderProcesos(filtered);
+    });
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* TOAST                                                               */
+    /* ══════════════════════════════════════════════════════════════════ */
+    function mostrarToast() {
+        const toast = document.getElementById('toast-estado');
+        toast.style.opacity       = '1';
+        toast.style.pointerEvents = 'auto';
+        setTimeout(() => {
+            toast.style.opacity       = '0';
+            toast.style.pointerEvents = 'none';
+        }, 2000);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* UTILS                                                               */
+    /* ══════════════════════════════════════════════════════════════════ */
+    function escapeAttr(str) {
+        return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    /* ══════════════════════════════════════════════════════════════════ */
+    /* INIT                                                                */
+    /* ══════════════════════════════════════════════════════════════════ */
+    loadProcesos();
+</script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Tickets – S&P Gestión</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#102a47",
+                        "accent": "#e51148",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13191f",
+                    },
+                    fontFamily: { "display": ["Outfit", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        html {
+            font-size: 110%;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-primary flex flex-col h-full border-r border-primary/10">
+            <div class="px-5 py-4 flex items-center justify-start border-b border-white/10">
+                <img src="logo.png" alt="Solutions &amp; Payroll" class="h-14 w-auto object-contain" />
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                    href="index.html">
+                    <span class="material-symbols-outlined text-xl">dashboard</span>
+                    <span class="text-sm font-medium">Inicio</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                    href="proyectos.html">
+                    <span class="material-symbols-outlined text-xl">sync_alt</span>
+                    <span class="text-sm font-medium">Procesos</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors group"
+                    href="tickets.html">
+                    <span class="material-symbols-outlined text-xl">confirmation_number</span>
+                    <span class="text-sm font-medium">Tickets</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                    href="ahorros.html">
+                    <span class="material-symbols-outlined text-xl">savings</span>
+                    <span class="text-sm font-medium">Ahorros</span>
+                </a>
+            </nav>
+            <div class="px-4 py-6 mt-auto border-t border-white/10">
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                    href="#">
+                    <span class="material-symbols-outlined text-xl">settings</span>
+                    <span class="text-sm font-medium">Configuración</span>
+                </a>
+            </div>
+        </aside>
+        <!-- Contenido principal -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Encabezado -->
+            <header
+                class="py-6 px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between z-10 shrink-0 sticky top-0">
+                <h2 class="text-2xl font-black text-primary dark:text-slate-100 tracking-tight">Gestión de Tickets</h2>
+                <button id="btn-nuevo-ticket"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-lg text-sm font-bold shadow-lg shadow-accent/20 hover:bg-accent/90 transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-lg">add_circle</span>
+                    Nuevo Ticket
+                </button>
+            </header>
+            <!-- Contenido con scroll -->
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div class="max-w-7xl mx-auto space-y-6">
+                    <!-- Barra de búsqueda propia de Tickets -->
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        <input id="search-tickets"
+                            class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                            placeholder="Buscar tickets por asunto, prioridad o estatus..." type="text" />
+                    </div>
+
+                    <!-- Tabla de Tickets -->
+                    <div
+                        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr
+                                        class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Fecha</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Asunto</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Prioridad</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Estatus</th>
+                                        <th
+                                            class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
+                                            Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="tbody-tickets">
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                            <span
+                                                class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
+                                            No hay tickets registrados aún.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Nuevo Ticket -->
+    <div id="modal-ticket" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div
+            class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto">
+            <button id="modal-close"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h3 class="text-xl font-black text-primary dark:text-white mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined">add_task</span>
+                Nuevo Ticket
+            </h3>
+            <form id="form-ticket" class="space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Fecha</label>
+                        <input name="date" type="date" required
+                            class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label
+                            class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Prioridad</label>
+                        <select name="priority"
+                            class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none">
+                            <option>Baja</option>
+                            <option selected>Media</option>
+                            <option>Alta</option>
+                            <option>Crítica</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Asunto</label>
+                    <input name="subject" required placeholder="Resumen breve del problema..."
+                        class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                </div>
+                <div>
+                    <label
+                        class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Descripción</label>
+                    <textarea name="description" rows="4" placeholder="Detalle completo del problema..."
+                        class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Evidencia /
+                        Adjunto (Opcional)</label>
+                    <input name="attachment" type="file"
+                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-accent/10 file:text-accent hover:file:bg-accent/20 cursor-pointer" />
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" id="modal-cancel"
+                        class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                    <button type="submit"
+                        class="px-8 py-2.5 bg-accent text-white font-bold rounded-lg hover:bg-accent/90 transition-all shadow-lg shadow-accent/20">Enviar
+                        Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        const priorityColor = {
+            'Baja': 'bg-slate-100 text-slate-600',
+            'Media': 'bg-blue-100 text-blue-700',
+            'Alta': 'bg-amber-100 text-amber-700',
+            'Crítica': 'bg-red-100 text-red-700',
+        };
+        const statusColor = {
+            'Abierto': 'bg-red-50 text-red-600',
+            'En Proceso': 'bg-blue-50 text-blue-600',
+            'Resuelto': 'bg-emerald-50 text-emerald-600',
+            'Cerrado': 'bg-slate-50 text-slate-500',
+        };
+
+        let allTickets = [];
+
+        function renderTickets(data) {
+            const tbody = document.getElementById('tbody-tickets');
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
+                    <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
+                    No hay tickets registrados aún.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(t => {
+                const pc = priorityColor[t.priority] || 'bg-slate-100 text-slate-600';
+                const sc = statusColor[t.status] || 'bg-slate-50 text-slate-500';
+                return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
+                    <td class="px-6 py-4 text-sm text-slate-500">${t.date || '—'}</td>
+                    <td class="px-6 py-4">
+                        <p class="text-sm font-semibold">${t.subject}</p>
+                        <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="deleteTicket(${t.id})"
+                                class="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                                <span class="material-symbols-outlined text-xl">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function loadTickets() {
+            try {
+                const data = await fetch(`${API}/tickets`).then(r => r.json());
+                allTickets = data;
+                renderTickets(data);
+            } catch (e) {
+                console.warn('Backend no disponible.');
+            }
+        }
+
+        async function deleteTicket(id) {
+            if (!confirm('¿Eliminar este ticket?')) return;
+            await fetch(`${API}/tickets/${id}`, { method: 'DELETE' });
+            loadTickets();
+        }
+
+        // Búsqueda
+        document.getElementById('search-tickets').addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            const filtered = allTickets.filter(t =>
+                (t.subject || '').toLowerCase().includes(q) ||
+                (t.priority || '').toLowerCase().includes(q) ||
+                (t.status || '').toLowerCase().includes(q)
+            );
+            renderTickets(filtered);
+        });
+
+        // Modal
+        const modal = document.getElementById('modal-ticket');
+        document.getElementById('btn-nuevo-ticket').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('modal-close').onclick = () => modal.classList.add('hidden');
+        document.getElementById('modal-cancel').onclick = () => modal.classList.add('hidden');
+
+        document.getElementById('form-ticket').onsubmit = async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            await fetch(`${API}/tickets`, { method: 'POST', body: fd });
+            modal.classList.add('hidden');
+            e.target.reset();
+            loadTickets();
+        };
+
+        loadTickets();
+    </script>
+</body>
+
+</html>
