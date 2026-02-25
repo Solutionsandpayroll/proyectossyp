@@ -39,7 +39,6 @@
 
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            /* Prevent icon bleed into adjacent text */
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -247,14 +246,18 @@
             animation: actFadeUp .6s cubic-bezier(.16, 1, .3, 1) forwards;
         }
 
-        /* ── Control chips – compact & unified ── */
+        /* ══════════════════════════════════════
+           CONTROL CHIPS — altura fija uniforme
+        ══════════════════════════════════════ */
         .ctrl-chip {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 3px;
-            padding: 3px 11px;
+            height: 32px;
+            padding: 0 13px;
             border-radius: 9999px;
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 700;
             cursor: pointer;
             transition: all .15s ease;
@@ -262,22 +265,25 @@
             letter-spacing: .03em;
             text-transform: uppercase;
             user-select: none;
-            line-height: 1.6;
+            line-height: 1;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .ctrl-chip .material-symbols-outlined {
             font-size: 13px !important;
+            line-height: 1;
         }
 
         .ctrl-chip.inactive {
             background: #f1f5f9;
-            color: #94a3b8;
+            color: #64748b;
             border-color: #e2e8f0;
         }
 
         .ctrl-chip.inactive:hover {
             background: #e2e8f0;
-            color: #475569;
+            color: #334155;
         }
 
         .ctrl-chip.active-pri {
@@ -305,21 +311,26 @@
             border-color: #f59e0b;
         }
 
-        /* ── Form controls – compact unified ── */
+        /* ══════════════════════════════════════
+           FORM CONTROLS — altura unificada 32px
+        ══════════════════════════════════════ */
         .act-select {
             appearance: none;
             background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 9px center;
-            padding: 4px 26px 4px 11px;
+            padding: 0 28px 0 11px;
             border: 2px solid #e2e8f0;
-            border-radius: 7px;
+            border-radius: 8px;
             font-family: 'Outfit', sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: #334155;
             cursor: pointer;
             outline: none;
             transition: border-color .15s;
-            height: 31px;
+            height: 32px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
         }
 
         .act-select:focus {
@@ -327,93 +338,114 @@
         }
 
         .act-date {
-            padding: 4px 11px;
+            padding: 0 11px;
             border: 2px solid #e2e8f0;
-            border-radius: 7px;
+            border-radius: 8px;
             font-family: 'Outfit', sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             color: #334155;
             outline: none;
             background: #f8fafc;
             transition: border-color .15s;
-            width: 136px;
-            height: 31px;
+            width: 138px;
+            height: 32px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
         }
 
         .act-date:focus {
             border-color: #102a47;
         }
 
+        /* Fix buscador: fondo translúcido sobre header oscuro */
         .act-search {
-            padding: 4px 11px 10px 84px;
-            border: 2px solid #e2e8f0;
-            border-radius: 7px;
+            padding: 0 11px 0 30px;
+            border: 1.5px solid rgba(255, 255, 255, .25);
+            border-radius: 8px;
             font-family: 'Outfit', sans-serif;
-            font-size: 9px;
+            font-size: 12px;
             font-weight: 600;
-            color: #334155;
+            color: #fff;
             outline: none;
-            background: #f8fafc;
-            width:200px;
-            transition: border-color .15s, width .2s;
-            height: 31px;
+            background: rgba(255, 255, 255, .12);
+            width: 200px;
+            height: 32px;
+            line-height: 1;
+            transition: border-color .2s, width .2s, background .2s;
+        }
+
+        .act-search::placeholder {
+            color: #334155;
+            opacity: 1;
         }
 
         .act-search:focus {
-            border-color: #102a47;
-            width: 220px;
+            border-color: rgba(255, 255, 255, .5);
+            background: rgba(255, 255, 255, .18);
+            width: 224px;
         }
 
-
-        /* ── Filter group label ── */
+        /* ══════════════════════════════════════
+           FILTER LABELS — más legibles
+        ══════════════════════════════════════ */
         .filter-label {
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .08em;
-            color: #94a3b8;
+            letter-spacing: .07em;
+            color: #64748b;
             white-space: nowrap;
-        }
-
-        /* ── Filter rows ── */
-        .filter-row {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .filter-divider {
-            width: 2px;
-            height: 19px;
-            background: #e2e8f0;
+            line-height: 1;
             flex-shrink: 0;
         }
 
-        /* ── Chart bars ── */
+        /* ══════════════════════════════════════
+           FILTER ROWS — alineación perfecta
+        ══════════════════════════════════════ */
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 38px;
+        }
+
+        .filter-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 32px;
+        }
+
+        .filter-divider {
+            width: 1.5px;
+            height: 22px;
+            background: #e2e8f0;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        /* ══════════════════════════════════════
+           CHART BARS — etiquetas sin solapado
+        ══════════════════════════════════════ */
         .chart-row {
             display: flex;
             align-items: center;
             gap: 0;
-            min-height: 35px;
+            min-height: 36px;
             position: relative;
         }
 
         .chart-label {
-            width: 185px;
-            min-width: 185px;
-            font-size: 11px;
+            width: 188px;
+            min-width: 188px;
+            font-size: 12px;
             font-weight: 700;
             color: #334155;
             text-align: right;
-            padding-right: 11px;
+            padding-right: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -422,24 +454,23 @@
 
         .chart-track {
             flex: 1;
-            height: 28px;
+            height: 30px;
             background: #f1f5f9;
-            border-radius: 6px;
-            overflow: hidden;
+            border-radius: 7px;
+            overflow: visible;
+            /* permite que la etiqueta salga fuera */
             position: relative;
         }
 
         .chart-bar {
             height: 100%;
-            border-radius: 6px;
+            border-radius: 7px;
             position: relative;
-            overflow: hidden;
             transition: width 1.1s cubic-bezier(.16, 1, .3, 1), opacity .3s;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding-right: 7px;
             min-width: 4px;
+            overflow: hidden;
         }
 
         .chart-bar-shimmer {
@@ -448,39 +479,60 @@
             background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .15) 50%, transparent 100%);
             background-size: 440px 100%;
             animation: shimmer 2.5s infinite;
+            border-radius: 7px;
+            overflow: hidden;
         }
 
+        /* Valor de la barra: siempre dentro, pegado a la derecha */
         .chart-val {
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 900;
-            color: #fff;
-            font-family: monospace;
-            position: relative;
-            z-index: 1;
+            font-family: 'Outfit', sans-serif;
             white-space: nowrap;
-            text-shadow: 0 2px 3px rgba(0, 0, 0, .35);
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, .45);
+            padding-right: 8px;
+            margin-left: auto;
             opacity: 0;
             animation: labelPop .4s ease forwards;
+            z-index: 5;
+            pointer-events: none;
+            flex-shrink: 0;
         }
 
         .chart-meta {
-            width: 110px;
-            min-width: 110px;
-            padding-left: 11px;
-            font-size: 11px;
-            color: #94a3b8;
+            width: 130px;
+            min-width: 130px;
+            padding-left: 14px;
+            font-size: 12px;
+            color: #64748b;
             font-weight: 600;
             display: flex;
             flex-direction: column;
             gap: 2px;
+            overflow: hidden;
+        }
+
+        .chart-meta span:first-child {
+            color: #334155;
+            font-weight: 700;
+            font-size: 11.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chart-meta span:last-child {
+            font-size: 11px;
+            color: #94a3b8;
         }
 
         .chart-grid {
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 2px;
-            background: rgba(0, 0, 0, .05);
+            width: 1px;
+            background: rgba(0, 0, 0, .06);
             pointer-events: none;
         }
 
@@ -510,21 +562,24 @@
             background: #e8edf2;
         }
 
-        /* ── Stat pills in header ── */
+        /* ══════════════════════════════════════
+           STAT PILLS — header
+        ══════════════════════════════════════ */
         .stat-pill {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 11px;
+            gap: 5px;
+            padding: 0 12px;
+            height: 28px;
             border-radius: 9999px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
-            letter-spacing: .03em;
+            letter-spacing: .02em;
             text-transform: uppercase;
         }
 
         .stat-pill .material-symbols-outlined {
-            font-size: 13px !important;
+            font-size: 14px !important;
         }
 
         .glow-sep {
@@ -537,11 +592,11 @@
             display: inline-flex;
             align-items: center;
             gap: 3px;
-            padding: 2px 7px;
+            padding: 3px 8px;
             background: rgba(16, 42, 71, .07);
             border: 2px solid rgba(16, 42, 71, .12);
             border-radius: 9999px;
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 700;
             color: #102a47;
         }
@@ -551,7 +606,7 @@
             align-items: center;
             color: #94a3b8;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             line-height: 1;
             padding: 0;
             background: none;
@@ -567,15 +622,15 @@
             background: #102a47;
             color: #fff;
             border-radius: 11px;
-            padding: 11px 15px;
-            font-size: 11px;
+            padding: 12px 16px;
+            font-size: 11.5px;
             font-weight: 700;
             pointer-events: none;
             z-index: 999;
             box-shadow: 0 9px 31px rgba(16, 42, 71, .28);
             opacity: 0;
             transition: opacity .12s;
-            min-width: 187px;
+            min-width: 190px;
             border: 2px solid rgba(255, 255, 255, .07);
         }
 
@@ -602,7 +657,76 @@
 
         .chart-scroll::-webkit-scrollbar-thumb {
             background: #e2e8f0;
-            border-radius: 7332px;
+            border-radius: 999px;
+        }
+
+        /* ══════════════════════════════════════
+           AXIS HEADER — alineación con track
+        ══════════════════════════════════════ */
+        .axis-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 2px;
+        }
+
+        .axis-header .chart-label-head {
+            width: 188px;
+            min-width: 188px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #94a3b8;
+            text-align: right;
+            padding-right: 12px;
+        }
+
+        .axis-header .axis-track {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+        }
+
+        .axis-header .axis-num {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #c0cad6;
+            font-family: monospace;
+        }
+
+        .axis-header .chart-meta-head {
+            width: 130px;
+            min-width: 130px;
+            padding-left: 14px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #94a3b8;
+        }
+
+        /* ══════════════════════════════════════
+           HEADER SEARCH wrapper fix
+        ══════════════════════════════════════ */
+        .act-search-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .act-search-wrapper .material-symbols-outlined {
+            position: absolute;
+            left: 9px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, .5);
+            font-size: 15px !important;
+            pointer-events: none;
+            z-index: 1;
         }
     </style>
 </head>
@@ -962,36 +1086,31 @@
 
                                 <!-- Header con stats -->
                                 <div
-                                    class="px-5 pt-4 pb-3.5 bg-gradient-to-r from-primary to-[#1a3f6b] relative overflow-hidden">
+                                    class="px-5 pt-4 pb-4 bg-gradient-to-r from-primary to-[#1a3f6b] relative overflow-hidden">
                                     <div class="shimmer-bg absolute inset-0 pointer-events-none"></div>
                                     <div class="relative flex flex-wrap items-center justify-between gap-3">
                                         <div>
                                             <div
-                                                class="text-[9px] font-black uppercase tracking-widest text-white/50 mb-1.5">
-                                                Actividades · Ahorro por proceso</div>
+                                                class="text-[9px] font-black uppercase tracking-widest text-white/50 mb-2">
+                                                Actividades · Ahorro por proceso
+                                            </div>
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <span id="act-stat-total" class="stat-pill bg-white/10 text-white">
-                                                    <span class="material-symbols-outlined"
-                                                        style="font-size:14px;">savings</span>
+                                                    <span class="material-symbols-outlined">savings</span>
                                                     <span>Total: —</span>
                                                 </span>
                                                 <span id="act-stat-count" class="stat-pill bg-white/10 text-white">
-                                                    <span class="material-symbols-outlined"
-                                                        style="font-size:14px;">format_list_numbered</span>
+                                                    <span class="material-symbols-outlined">format_list_numbered</span>
                                                     <span>0 actividades</span>
                                                 </span>
                                                 <span id="act-stat-avg" class="stat-pill bg-accent/30 text-white">
-                                                    <span class="material-symbols-outlined"
-                                                        style="font-size:14px;">avg_pace</span>
+                                                    <span class="material-symbols-outlined">avg_pace</span>
                                                     <span>Prom: —</span>
                                                 </span>
                                             </div>
                                         </div>
-                                        <!-- Búsqueda interna -->
-                                        <div class="relative">
-                                            <span
-                                                class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-slate-400"
-                                                style="font-size:15px; line-height:1; pointer-events:none;">search</span>
+                                        <!-- Búsqueda interna — wrapper corregido -->
+                                        <div class="act-search-wrapper">
                                             <input id="act-search" type="text" placeholder="Buscar proceso…"
                                                 class="act-search" />
                                         </div>
@@ -1000,14 +1119,14 @@
 
                                 <div class="glow-sep"></div>
 
-                                <!-- ── Barra de filtros compacta y organizada ── -->
+                                <!-- ── Barra de filtros ── -->
                                 <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 space-y-2.5">
 
-                                    <!-- Fila 1: Mostrar / Ordenar / Modo de visualización -->
+                                    <!-- Fila 1 -->
                                     <div class="filter-row">
                                         <div class="filter-group">
                                             <span class="filter-label">Ver</span>
-                                            <div class="flex gap-1" id="ctrl-limit">
+                                            <div class="flex gap-1.5" id="ctrl-limit">
                                                 <button class="ctrl-chip active-pri" data-val="10"
                                                     onclick="actSetLimit(this,10)">Top 10</button>
                                                 <button class="ctrl-chip inactive" data-val="20"
@@ -1037,7 +1156,7 @@
 
                                         <div class="filter-group">
                                             <span class="filter-label">Métrica</span>
-                                            <div class="flex gap-1" id="ctrl-mode">
+                                            <div class="flex gap-1.5" id="ctrl-mode">
                                                 <button class="ctrl-chip active-pri" data-val="amount"
                                                     onclick="actSetMode(this,'amount')">Ahorro</button>
                                                 <button class="ctrl-chip inactive" data-val="reduction"
@@ -1050,11 +1169,11 @@
                                         </div>
                                     </div>
 
-                                    <!-- Fila 2: Estatus / Área / Fecha / Monto mín -->
+                                    <!-- Fila 2 -->
                                     <div class="filter-row">
                                         <div class="filter-group">
                                             <span class="filter-label">Estatus</span>
-                                            <div class="flex gap-1" id="ctrl-status">
+                                            <div class="flex gap-1.5" id="ctrl-status">
                                                 <button class="ctrl-chip active-pri" data-val="all"
                                                     onclick="actSetStatus(this,'all')">Todos</button>
                                                 <button class="ctrl-chip inactive" data-val="Realizado"
@@ -1077,15 +1196,15 @@
 
                                         <div class="filter-divider"></div>
 
-                                        <div class="filter-group">
+                                        <div class="filter-group" style="height:auto;">
                                             <span class="filter-label">Fecha</span>
                                             <input type="date" id="ctrl-date-from" class="act-date"
                                                 onchange="actApplyFilters()" />
-                                            <span class="text-slate-300 font-bold text-xs">–</span>
+                                            <span class="text-slate-300 font-bold text-xs leading-none">–</span>
                                             <input type="date" id="ctrl-date-to" class="act-date"
                                                 onchange="actApplyFilters()" />
                                             <button onclick="actClearDates()" class="ctrl-chip inactive"
-                                                style="padding:3px 7px;">
+                                                style="padding: 0 9px; min-width:32px;">
                                                 <span class="material-symbols-outlined"
                                                     style="font-size:14px;">close</span>
                                             </button>
@@ -1105,35 +1224,28 @@
                                         </div>
 
                                         <button onclick="actResetFilters()" class="ctrl-chip inactive ml-auto"
-                                            style="gap:3px;">
+                                            style="gap:4px;">
                                             <span class="material-symbols-outlined"
                                                 style="font-size:14px;">restart_alt</span>
                                             Resetear
                                         </button>
                                     </div>
 
-                                    <!-- Tags de filtros activos -->
+                                    <!-- Tags filtros activos -->
                                     <div id="active-filters-strip"
                                         class="hidden flex flex-wrap gap-1.5 pt-2 border-t border-slate-100"></div>
                                 </div>
 
-                                <!-- ── Eje de referencia ── -->
+                                <!-- ── Eje de referencia — usa nueva clase axis-header ── -->
                                 <div class="px-5 pt-3.5 pb-1">
-                                    <div class="flex items-center"
-                                        style="padding-bottom:5px;border-bottom:1px solid #f1f5f9;">
-                                        <div
-                                            class="chart-label text-[9px] font-black uppercase tracking-wider text-slate-400 text-right pr-3">
-                                            Proceso</div>
-                                        <div class="flex-1 flex items-center justify-between px-2">
-                                            <span class="text-[8.5px] font-bold text-slate-300 font-mono">$0</span>
-                                            <span id="axis-mid"
-                                                class="text-[8.5px] font-bold text-slate-300 font-mono">—</span>
-                                            <span id="axis-max"
-                                                class="text-[8.5px] font-bold text-slate-300 font-mono">—</span>
+                                    <div class="axis-header">
+                                        <div class="chart-label-head">Proceso</div>
+                                        <div class="axis-track">
+                                            <span class="axis-num">$0</span>
+                                            <span id="axis-mid" class="axis-num">—</span>
+                                            <span id="axis-max" class="axis-num">—</span>
                                         </div>
-                                        <div
-                                            class="chart-meta text-[9px] font-black uppercase tracking-wider text-slate-400">
-                                            Detalle</div>
+                                        <div class="chart-meta-head">Detalle</div>
                                     </div>
                                 </div>
 
@@ -1327,7 +1439,7 @@
         </div>
     </div>
 
-    <!-- ═══════════ JAVASCRIPT ═══════════ -->
+    <!-- ═══════════ JAVASCRIPT — sin cambios funcionales ═══════════ -->
     <script>
         const API = 'https://proyectossyp.onrender.com/api';
         const fmt = n => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
@@ -1420,7 +1532,6 @@
             loadAhorros();
         }
 
-        /* ══ SELECT PROCESOS ══ */
         async function loadProcesosForSelect() {
             try {
                 const procesos = await fetch(`${API}/proyectos`).then(r => r.json());
@@ -1433,7 +1544,6 @@
             } catch (e) { console.warn('Error cargando procesos.'); }
         }
 
-        /* ══ BUSCADOR TABLA ══ */
         document.getElementById('search-ahorros').addEventListener('input', function () {
             const q = this.value.toLowerCase();
             renderAhorros(allAhorros.filter(s =>
@@ -1443,7 +1553,6 @@
             ));
         });
 
-        /* ══ MODAL AHORRO ══ */
         const modal = document.getElementById('modal-ahorro');
         document.getElementById('btn-nuevo-ahorro').onclick = () => modal.classList.remove('hidden');
         document.getElementById('modal-close').onclick = () => modal.classList.add('hidden');
@@ -1493,7 +1602,6 @@
             document.getElementById('ahorro-encargado').value = p ? (p.encargado || '') : '';
         });
 
-        /* ══ MODAL CHART ══ */
         const modalChart = document.getElementById('modal-chart');
         document.getElementById('modal-chart-close').onclick = () => modalChart.classList.add('hidden');
 
@@ -1509,10 +1617,7 @@
                 type: 'bar',
                 data: {
                     labels: ['ANTES', 'ACTUAL', 'AHORRO'],
-                    datasets: [{
-                        label: 'COP ($)', data: [saving.total_antes, saving.total_actual, saving.amount],
-                        backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(30,77,128,0.9)', 'rgba(229,17,72,0.9)'], borderRadius: 5
-                    }]
+                    datasets: [{ label: 'COP ($)', data: [saving.total_antes, saving.total_actual, saving.amount], backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(30,77,128,0.9)', 'rgba(229,17,72,0.9)'], borderRadius: 5 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tt }, scales: { y: { beginAtZero: true, ticks: { callback: v => fmtShort(v) } } } }
             });
@@ -1520,10 +1625,7 @@
                 type: 'doughnut',
                 data: {
                     labels: ['Total Actual', 'Ahorro Logrado'],
-                    datasets: [{
-                        data: [saving.total_actual, saving.amount],
-                        backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(229,17,72,0.9)'], hoverOffset: 4, borderWidth: 2
-                    }]
+                    datasets: [{ data: [saving.total_actual, saving.amount], backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(229,17,72,0.9)'], hoverOffset: 4, borderWidth: 2 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { tooltip: tt, legend: { position: 'bottom' } } }
             });
@@ -1571,23 +1673,20 @@
            ACTIVIDADES – motor de filtrado + gráfica custom
         ══════════════════════════════════════════════════════ */
         (function () {
-            // ── Brand colors for bars (azul y rojo del sistema) ──
             const STATUS_GRAD = {
-                'Realizado': 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',   // azul primario
-                'Proyectado': 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',   // rojo accent
-                'Pendiente': 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',   // azul→rojo
+                'Realizado': 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',
+                'Proyectado': 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',
+                'Pendiente': 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',
             };
             const STATUS_DOT = {
                 'Realizado': '#102a47',
                 'Proyectado': '#e51148',
                 'Pendiente': '#94a3b8',
             };
-
-            // Reduction-based: use system palette shades
             const REDUCTION_GRAD = {
-                high: 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',   // >75% → deep blue
-                mid: 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',   // 40-75% → blue→red
-                low: 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',   // <40% → red
+                high: 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',
+                mid: 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',
+                low: 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',
             };
 
             let state = { limit: 10, sort: 'amount_desc', status: 'all', mode: 'amount', dateFrom: '', dateTo: '', area: 'all', minAmount: 0, search: '' };
@@ -1747,46 +1846,63 @@
                     const valFmt = isPercent ? fmtPct(val) : fmtShort(val);
                     const dotCol = STATUS_DOT[item.status] || '#94a3b8';
                     const delay = (i * 0.04).toFixed(3);
+
+                    // Format date nicely (remove T00:00:00... suffix)
+                    const rawDate = (item.date || '—');
+                    const niceDate = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
+
                     let sub1 = '', sub2 = '';
-                    if (state.mode === 'amount') { sub1 = item.date || '—'; sub2 = item.status; }
+                    if (state.mode === 'amount') { sub1 = niceDate; sub2 = item.status; }
                     if (state.mode === 'reduction') { sub1 = fmtShort(item.total_antes || 0) + ' → ' + fmtShort(item.total_actual || 0); sub2 = item.status; }
-                    if (state.mode === 'before') { sub1 = 'Actual: ' + fmtShort(item.total_actual || 0); sub2 = item.date || '—'; }
-                    if (state.mode === 'after') { sub1 = 'Ahorro: ' + fmtShort(item.amount); sub2 = item.date || '—'; }
+                    if (state.mode === 'before') { sub1 = 'Actual: ' + fmtShort(item.total_actual || 0); sub2 = niceDate; }
+                    if (state.mode === 'after') { sub1 = 'Ahorro: ' + fmtShort(item.amount); sub2 = niceDate; }
+
                     const ttData = JSON.stringify({
                         name: item.project_name, area: item.project_area || '—',
                         amount: fmt(item.amount), before: fmt(item.total_antes || 0),
                         after: fmt(item.total_actual || 0), reduction: fmtPct(item._reduction),
-                        status: item.status, date: item.date || '—'
+                        status: item.status, date: niceDate
                     }).replace(/"/g, '&quot;');
+
+                    // Decide si mostrar valor dentro (barra ancha) o fuera (barra corta)
+                    const isWide = parseFloat(pct) >= 20;
+
                     return `
                     <div class="chart-row" style="animation:actFadeUp .4s cubic-bezier(.16,1,.3,1) ${delay}s both;"
                         data-tt="${ttData}" onmouseenter="__actShowTT(event,this)" onmousemove="__actMoveTT(event)" onmouseleave="__actHideTT()">
                         <div class="chart-label" title="${item.project_name}">
-                            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dotCol};margin-right:4px;vertical-align:middle;flex-shrink:0;"></span>${label}
+                            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${dotCol};margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>${label}
                         </div>
-                        <div class="chart-track">
+                        <div class="chart-track" style="overflow:visible;position:relative;">
                             <div class="chart-grid" style="left:25%"></div>
                             <div class="chart-grid" style="left:50%"></div>
                             <div class="chart-grid" style="left:75%"></div>
-                            <div class="chart-bar" style="width:${pct}%;background:${grad};animation-delay:${delay}s;">
+                            <div class="chart-bar" style="width:${pct}%;background:${grad};animation-delay:${delay}s;overflow:hidden;">
                                 <div class="chart-bar-shimmer"></div>
-                                <span class="chart-val" style="animation-delay:${(parseFloat(delay) + .55).toFixed(2)}s;">${valFmt}</span>
+                                ${isWide
+                            ? `<span class="chart-val" style="animation-delay:${(parseFloat(delay) + .55).toFixed(2)}s;">${valFmt}</span>`
+                            : ''
+                        }
                             </div>
+                            ${!isWide
+                            ? `<span style="position:absolute;left:calc(${pct}% + 6px);top:50%;transform:translateY(-50%);font-size:11px;font-weight:900;color:#334155;white-space:nowrap;opacity:0;animation:labelPop .4s ease ${(parseFloat(delay) + .55).toFixed(2)}s forwards;pointer-events:none;font-family:'Outfit',sans-serif;">${valFmt}</span>`
+                            : ''
+                        }
                         </div>
                         <div class="chart-meta">
-                            <span style="font-size:9.5px;font-weight:700;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub1}</span>
-                            <span style="font-size:11px;color:#94a3b8;">${sub2}</span>
+                            <span>${sub1}</span>
+                            <span>${sub2}</span>
                         </div>
                     </div>`;
                 }).join('');
-                container.innerHTML = `<div style="display:flex;flex-direction:column;gap:3px;padding-top:6px;">${rows}</div>`;
+                container.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;padding-top:6px;">${rows}</div>`;
             }
 
             window.__actShowTT = (e, el) => {
                 const d = JSON.parse(el.dataset.tt.replace(/&quot;/g, '"'));
                 showTooltip(e, `
                     <div style="font-size:13px;font-weight:900;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px;">${d.name}</div>
-                    <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 9px;font-size:9.5px;">
+                    <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 9px;font-size:10px;">
                         <span style="opacity:.5">Área</span><span>${d.area}</span>
                         <span style="opacity:.5">Ahorro</span><span style="color:#ff6b94;font-weight:900;">${d.amount}</span>
                         <span style="opacity:.5">Antes</span><span>${d.before}</span>
