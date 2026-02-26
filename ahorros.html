@@ -39,6 +39,7 @@
 
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            /* Prevent icon bleed into adjacent text */
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -246,18 +247,14 @@
             animation: actFadeUp .6s cubic-bezier(.16, 1, .3, 1) forwards;
         }
 
-        /* ══════════════════════════════════════
-           CONTROL CHIPS — altura fija uniforme
-        ══════════════════════════════════════ */
+        /* ── Control chips – compact & unified ── */
         .ctrl-chip {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 3px;
-            height: 32px;
-            padding: 0 13px;
+            padding: 3px 11px;
             border-radius: 9999px;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
             cursor: pointer;
             transition: all .15s ease;
@@ -265,25 +262,22 @@
             letter-spacing: .03em;
             text-transform: uppercase;
             user-select: none;
-            line-height: 1;
-            white-space: nowrap;
-            flex-shrink: 0;
+            line-height: 1.6;
         }
 
         .ctrl-chip .material-symbols-outlined {
             font-size: 13px !important;
-            line-height: 1;
         }
 
         .ctrl-chip.inactive {
             background: #f1f5f9;
-            color: #64748b;
+            color: #94a3b8;
             border-color: #e2e8f0;
         }
 
         .ctrl-chip.inactive:hover {
             background: #e2e8f0;
-            color: #334155;
+            color: #475569;
         }
 
         .ctrl-chip.active-pri {
@@ -311,26 +305,21 @@
             border-color: #f59e0b;
         }
 
-        /* ══════════════════════════════════════
-           FORM CONTROLS — altura unificada 32px
-        ══════════════════════════════════════ */
+        /* ── Form controls – compact unified ── */
         .act-select {
             appearance: none;
             background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 9px center;
-            padding: 0 28px 0 11px;
+            padding: 4px 26px 4px 11px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 7px;
             font-family: 'Outfit', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #334155;
             cursor: pointer;
             outline: none;
             transition: border-color .15s;
-            height: 32px;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
+            height: 31px;
         }
 
         .act-select:focus {
@@ -338,114 +327,93 @@
         }
 
         .act-date {
-            padding: 0 11px;
+            padding: 4px 11px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 7px;
             font-family: 'Outfit', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #334155;
             outline: none;
             background: #f8fafc;
             transition: border-color .15s;
-            width: 138px;
-            height: 32px;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
+            width: 136px;
+            height: 31px;
         }
 
         .act-date:focus {
             border-color: #102a47;
         }
 
-        /* Fix buscador: fondo translúcido sobre header oscuro */
         .act-search {
-            padding: 0 11px 0 30px;
-            border: 1.5px solid rgba(255, 255, 255, .25);
-            border-radius: 8px;
+            padding: 4px 11px 4px 34px;
+            border: 2px solid #e2e8f0;
+            border-radius: 7px;
             font-family: 'Outfit', sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            color: #fff;
-            outline: none;
-            background: rgba(255, 255, 255, .12);
-            width: 200px;
-            height: 32px;
-            line-height: 1;
-            transition: border-color .2s, width .2s, background .2s;
-        }
-
-        .act-search::placeholder {
             color: #334155;
-            opacity: 1;
+            outline: none;
+            background: #f8fafc;
+            width: 187px;
+            transition: border-color .15s, width .2s;
+            height: 31px;
         }
 
         .act-search:focus {
-            border-color: rgba(255, 255, 255, .5);
-            background: rgba(255, 255, 255, .18);
-            width: 224px;
+            border-color: #102a47;
+            width: 220px;
         }
 
-        /* ══════════════════════════════════════
-           FILTER LABELS — más legibles
-        ══════════════════════════════════════ */
+
+        /* ── Filter group label ── */
         .filter-label {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .07em;
-            color: #64748b;
+            letter-spacing: .08em;
+            color: #94a3b8;
             white-space: nowrap;
-            line-height: 1;
-            flex-shrink: 0;
         }
 
-        /* ══════════════════════════════════════
-           FILTER ROWS — alineación perfecta
-        ══════════════════════════════════════ */
+        /* ── Filter rows ── */
         .filter-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 11px;
             flex-wrap: wrap;
-            min-height: 38px;
         }
 
         .filter-group {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 7px;
-            height: 32px;
+            gap: 6px;
         }
 
         .filter-divider {
-            width: 1.5px;
-            height: 22px;
+            width: 2px;
+            height: 19px;
             background: #e2e8f0;
             flex-shrink: 0;
-            align-self: center;
         }
 
-        /* ══════════════════════════════════════
-           CHART BARS — etiquetas sin solapado
-        ══════════════════════════════════════ */
+        /* ── Chart bars ── */
         .chart-row {
             display: flex;
             align-items: center;
             gap: 0;
-            min-height: 36px;
+            min-height: 35px;
             position: relative;
         }
 
         .chart-label {
-            width: 188px;
-            min-width: 188px;
-            font-size: 12px;
+            width: 185px;
+            min-width: 185px;
+            font-size: 11px;
             font-weight: 700;
             color: #334155;
             text-align: right;
-            padding-right: 12px;
+            padding-right: 11px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -454,23 +422,24 @@
 
         .chart-track {
             flex: 1;
-            height: 30px;
+            height: 28px;
             background: #f1f5f9;
-            border-radius: 7px;
-            overflow: visible;
-            /* permite que la etiqueta salga fuera */
+            border-radius: 6px;
+            overflow: hidden;
             position: relative;
         }
 
         .chart-bar {
             height: 100%;
-            border-radius: 7px;
+            border-radius: 6px;
             position: relative;
+            overflow: hidden;
             transition: width 1.1s cubic-bezier(.16, 1, .3, 1), opacity .3s;
             display: flex;
             align-items: center;
+            justify-content: flex-end;
+            padding-right: 7px;
             min-width: 4px;
-            overflow: hidden;
         }
 
         .chart-bar-shimmer {
@@ -479,60 +448,39 @@
             background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .15) 50%, transparent 100%);
             background-size: 440px 100%;
             animation: shimmer 2.5s infinite;
-            border-radius: 7px;
-            overflow: hidden;
         }
 
-        /* Valor de la barra: siempre dentro, pegado a la derecha */
         .chart-val {
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 900;
-            font-family: 'Outfit', sans-serif;
-            white-space: nowrap;
             color: #fff;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, .45);
-            padding-right: 8px;
-            margin-left: auto;
+            font-family: monospace;
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
+            text-shadow: 0 2px 3px rgba(0, 0, 0, .35);
             opacity: 0;
             animation: labelPop .4s ease forwards;
-            z-index: 5;
-            pointer-events: none;
-            flex-shrink: 0;
         }
 
         .chart-meta {
-            width: 130px;
-            min-width: 130px;
-            padding-left: 14px;
-            font-size: 12px;
-            color: #64748b;
+            width: 110px;
+            min-width: 110px;
+            padding-left: 11px;
+            font-size: 11px;
+            color: #94a3b8;
             font-weight: 600;
             display: flex;
             flex-direction: column;
             gap: 2px;
-            overflow: hidden;
-        }
-
-        .chart-meta span:first-child {
-            color: #334155;
-            font-weight: 700;
-            font-size: 11.5px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .chart-meta span:last-child {
-            font-size: 11px;
-            color: #94a3b8;
         }
 
         .chart-grid {
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 1px;
-            background: rgba(0, 0, 0, .06);
+            width: 2px;
+            background: rgba(0, 0, 0, .05);
             pointer-events: none;
         }
 
@@ -562,24 +510,21 @@
             background: #e8edf2;
         }
 
-        /* ══════════════════════════════════════
-           STAT PILLS — header
-        ══════════════════════════════════════ */
+        /* ── Stat pills in header ── */
         .stat-pill {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 0 12px;
-            height: 28px;
+            gap: 4px;
+            padding: 3px 11px;
             border-radius: 9999px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
-            letter-spacing: .02em;
+            letter-spacing: .03em;
             text-transform: uppercase;
         }
 
         .stat-pill .material-symbols-outlined {
-            font-size: 14px !important;
+            font-size: 13px !important;
         }
 
         .glow-sep {
@@ -592,11 +537,11 @@
             display: inline-flex;
             align-items: center;
             gap: 3px;
-            padding: 3px 8px;
+            padding: 2px 7px;
             background: rgba(16, 42, 71, .07);
             border: 2px solid rgba(16, 42, 71, .12);
             border-radius: 9999px;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
             color: #102a47;
         }
@@ -606,7 +551,7 @@
             align-items: center;
             color: #94a3b8;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1;
             padding: 0;
             background: none;
@@ -622,15 +567,15 @@
             background: #102a47;
             color: #fff;
             border-radius: 11px;
-            padding: 12px 16px;
-            font-size: 11.5px;
+            padding: 11px 15px;
+            font-size: 11px;
             font-weight: 700;
             pointer-events: none;
             z-index: 999;
             box-shadow: 0 9px 31px rgba(16, 42, 71, .28);
             opacity: 0;
             transition: opacity .12s;
-            min-width: 190px;
+            min-width: 187px;
             border: 2px solid rgba(255, 255, 255, .07);
         }
 
@@ -657,76 +602,7 @@
 
         .chart-scroll::-webkit-scrollbar-thumb {
             background: #e2e8f0;
-            border-radius: 999px;
-        }
-
-        /* ══════════════════════════════════════
-           AXIS HEADER — alineación con track
-        ══════════════════════════════════════ */
-        .axis-header {
-            display: flex;
-            align-items: center;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #f1f5f9;
-            margin-bottom: 2px;
-        }
-
-        .axis-header .chart-label-head {
-            width: 188px;
-            min-width: 188px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: #94a3b8;
-            text-align: right;
-            padding-right: 12px;
-        }
-
-        .axis-header .axis-track {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 4px;
-        }
-
-        .axis-header .axis-num {
-            font-size: 9.5px;
-            font-weight: 700;
-            color: #c0cad6;
-            font-family: monospace;
-        }
-
-        .axis-header .chart-meta-head {
-            width: 130px;
-            min-width: 130px;
-            padding-left: 14px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: #94a3b8;
-        }
-
-        /* ══════════════════════════════════════
-           HEADER SEARCH wrapper fix
-        ══════════════════════════════════════ */
-        .act-search-wrapper {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .act-search-wrapper .material-symbols-outlined {
-            position: absolute;
-            left: 9px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, .5);
-            font-size: 15px !important;
-            pointer-events: none;
-            z-index: 1;
+            border-radius: 7332px;
         }
     </style>
 </head>
@@ -790,10 +666,10 @@
 
                 <!-- Buscador -->
                 <div class="relative">
-                    <span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                         style="font-size:22px;">search</span>
                     <input id="search-ahorros"
-                        class="w-full pl-16 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                        class="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
                         placeholder="Buscar ahorros por proceso, área o estatus..." type="text" />
                 </div>
 
@@ -851,217 +727,439 @@
                         <div class="flex items-center gap-4 mb-5">
                             <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent">
                             </div>
-                            <div
-                                class="flex items-center gap-2 px-4 py-1.5 bg-primary/5 border border-primary/10 rounded-full">
-                                <span class="material-symbols-outlined text-primary"
-                                    style="font-size:19px;">auto_graph</span>
-                                <span class="text-xs font-black text-primary tracking-wide uppercase">Consolidado
-                                    2025</span>
+                            <div class="flex items-center gap-1 p-1 bg-slate-100 border border-slate-200 rounded-full">
+                                <button id="tab-btn-2025" onclick="switchYearTab('2025')"
+                                    class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black tracking-wide uppercase transition-all bg-primary text-white shadow-sm">
+                                    <span class="material-symbols-outlined" style="font-size:13px;">auto_graph</span>
+                                    Consolidado 2025
+                                </button>
+                                <button id="tab-btn-2026" onclick="switchYearTab('2026')"
+                                    class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black tracking-wide uppercase transition-all text-slate-500 hover:text-primary">
+                                    <span class="material-symbols-outlined" style="font-size:13px;">auto_graph</span>
+                                    Consolidado 2026
+                                </button>
                             </div>
                             <div class="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                            <div class="lg:col-span-5 flex flex-col gap-4">
-                                <!-- Tarjeta Ejecutado -->
-                                <div class="stat-card relative overflow-hidden rounded-2xl bg-primary p-5 text-white shadow-xl shadow-primary/20"
-                                    style="animation-delay:0.1s">
-                                    <div
-                                        class="dot-float-1 absolute top-4 right-10 w-20 h-20 bg-white/10 rounded-full blur-xl pointer-events-none">
-                                    </div>
-                                    <div
-                                        class="dot-float-2 absolute bottom-2 right-4 w-12 h-12 bg-accent/20 rounded-full blur-lg pointer-events-none">
-                                    </div>
-                                    <div class="shimmer-bg absolute inset-0 pointer-events-none"></div>
-                                    <div class="relative flex items-start justify-between mb-3">
-                                        <div class="flex flex-col">
-                                            <span
-                                                class="text-[9px] font-black uppercase tracking-[0.15em] text-white/50 mb-0.5">Ahorro
-                                                Ejecutado</span>
-                                            <span class="text-xs font-semibold text-white/60">Año 2025</span>
-                                        </div>
-                                        <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
-                                            <span class="material-symbols-outlined text-white"
-                                                style="font-size:22px;">check_circle</span>
-                                        </div>
-                                    </div>
-                                    <div class="relative">
-                                        <div class="text-3xl font-black tracking-tight leading-none">$<span
-                                                class="counter" id="counter-ejecutado">0</span></div>
-                                        <div class="text-xs text-white/40 font-mono mt-1">COP</div>
-                                    </div>
-                                </div>
+                        <div id="panel-2025">
 
-                                <!-- Tarjeta Proyectado -->
-                                <div class="stat-card relative overflow-hidden rounded-2xl border-2 border-dashed border-accent/40 bg-white dark:bg-slate-900 p-5 shadow-lg"
-                                    style="animation-delay:0.25s">
-                                    <div
-                                        class="dot-float-3 absolute top-3 right-8 w-16 h-16 bg-accent/10 rounded-full blur-xl pointer-events-none">
-                                    </div>
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div class="flex flex-col">
-                                            <span
-                                                class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400 mb-0.5">Proyección
-                                                Anual</span>
-                                            <span class="text-xs font-semibold text-slate-400">Al cabo de 1 año</span>
-                                        </div>
-                                        <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center"
-                                            style="animation: pulseGlow 2s ease infinite;">
-                                            <span class="material-symbols-outlined text-accent"
-                                                style="font-size:22px;">trending_up</span>
-                                        </div>
-                                    </div>
-                                    <div>
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                                <div class="lg:col-span-5 flex flex-col gap-4">
+                                    <!-- Tarjeta Ejecutado -->
+                                    <div class="stat-card relative overflow-hidden rounded-2xl bg-primary p-5 text-white shadow-xl shadow-primary/20"
+                                        style="animation-delay:0.1s">
                                         <div
-                                            class="text-3xl font-black tracking-tight leading-none text-primary dark:text-white">
-                                            $<span class="counter" id="counter-proyectado">0</span></div>
-                                        <div class="text-xs text-slate-400 font-mono mt-1">COP</div>
-                                    </div>
-                                </div>
-
-                                <!-- Barra de progreso -->
-                                <div class="stat-card rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm"
-                                    style="animation-delay:0.4s">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span
-                                            class="text-[9px] font-black uppercase tracking-wider text-slate-500">Avance
-                                            hacia la meta</span>
-                                        <span id="pct-label" class="text-sm font-black text-accent">0%</span>
-                                    </div>
-                                    <div id="progress-container"
-                                        class="relative h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2.5">
-                                        <div class="progress-fill h-full rounded-full relative overflow-hidden"
-                                            id="main-progress-bar"
-                                            style="--target-width: 26.2%; background: linear-gradient(90deg, #102a47 0%, #e51148 100%);">
-                                            <div class="shimmer-bg absolute inset-0"></div>
-                                        </div>
-                                        <div id="progress-marker"
-                                            class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-accent rounded-full shadow-md transition-all duration-[2s] ease-out"
-                                            style="left: 0%; opacity:0;"></div>
-                                    </div>
-                                    <div class="flex justify-between text-[9px] font-bold text-slate-400 font-mono">
-                                        <span>$0</span><span id="mid-label">$4.7M</span><span>$9.4M</span>
-                                    </div>
-                                    <div class="mt-3 space-y-1.5">
-                                        <div class="flex items-center gap-2 text-xs">
-                                            <div class="w-2.5 h-2.5 rounded-sm bg-primary flex-shrink-0"></div>
-                                            <span class="text-slate-500 flex-1">Ejecutado</span>
-                                            <span
-                                                class="font-bold text-primary dark:text-white font-mono text-[11px]">$2.468.287</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 text-xs">
-                                            <div class="w-2.5 h-2.5 rounded-sm bg-accent flex-shrink-0"></div>
-                                            <span class="text-slate-500 flex-1">Faltante proyectado</span>
-                                            <span class="font-bold text-accent font-mono text-[11px]">$6.942.269</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- SVG Radial -->
-                            <div class="lg:col-span-7">
-                                <div
-                                    class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm h-full p-5 flex flex-col">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span
-                                            class="text-[9px] font-black uppercase tracking-wider text-slate-500">Distribución
-                                            por anillos</span>
-                                        <div class="flex items-center gap-3 text-[9px] font-bold">
-                                            <span class="flex items-center gap-1.5"><span
-                                                    class="inline-block w-2.5 h-2.5 rounded-full bg-primary"></span>Ejecutado</span>
-                                            <span class="flex items-center gap-1.5"><span
-                                                    class="inline-block w-2.5 h-2.5 rounded-full bg-accent"></span>Proyectado</span>
-                                            <span class="flex items-center gap-1.5"><span
-                                                    class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200"></span>Pendiente</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 flex flex-col items-center justify-center relative"
-                                        id="svg-container">
-                                        <svg id="radial-svg" viewBox="0 0 360 300" width="100%" height="100%"
-                                            style="max-height:330px;">
-                                            <defs>
-                                                <linearGradient id="grad-ejecutado" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stop-color="#102a47" />
-                                                    <stop offset="100%" stop-color="#1e4d80" />
-                                                </linearGradient>
-                                                <linearGradient id="grad-proyectado" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stop-color="#e51148" />
-                                                    <stop offset="100%" stop-color="#ff4d80" />
-                                                </linearGradient>
-                                                <filter id="glow-blue">
-                                                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                                                    <feMerge>
-                                                        <feMergeNode in="coloredBlur" />
-                                                        <feMergeNode in="SourceGraphic" />
-                                                    </feMerge>
-                                                </filter>
-                                                <filter id="glow-red">
-                                                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                                                    <feMerge>
-                                                        <feMergeNode in="coloredBlur" />
-                                                        <feMergeNode in="SourceGraphic" />
-                                                    </feMerge>
-                                                </filter>
-                                            </defs>
-                                            <circle cx="180" cy="155" r="110" fill="none" stroke="#f1f5f9"
-                                                stroke-width="16" />
-                                            <circle id="arc-proyectado" cx="180" cy="155" r="110" fill="none"
-                                                stroke="url(#grad-proyectado)" stroke-width="16" stroke-linecap="round"
-                                                transform="rotate(-90 180 155)"
-                                                style="--dash-total:691.15;stroke-dasharray:691.15;stroke-dashoffset:691.15;"
-                                                class="arc-proyectado" filter="url(#glow-red)" />
-                                            <circle cx="180" cy="155" r="78" fill="none" stroke="#f1f5f9"
-                                                stroke-width="16" />
-                                            <circle id="arc-ejecutado" cx="180" cy="155" r="78" fill="none"
-                                                stroke="url(#grad-ejecutado)" stroke-width="16" stroke-linecap="round"
-                                                transform="rotate(-90 180 155)"
-                                                style="--dash-total:490.09;stroke-dasharray:490.09;stroke-dashoffset:490.09;"
-                                                class="arc-ejecutado" filter="url(#glow-blue)" />
-                                            <text x="180" y="142" text-anchor="middle" font-family="Outfit,sans-serif"
-                                                font-weight="900" font-size="22" fill="#102a47"
-                                                id="center-pct">26%</text>
-                                            <text x="180" y="162" text-anchor="middle" font-family="Outfit,sans-serif"
-                                                font-weight="500" font-size="9" fill="#94a3b8"
-                                                letter-spacing="2">EJECUTADO</text>
-                                            <text x="180" y="290" text-anchor="middle" font-family="Outfit,sans-serif"
-                                                font-weight="700" font-size="9" fill="#e51148"
-                                                letter-spacing="1.5">PROYECCIÓN ANUAL · 100%</text>
-                                            <circle cx="180" cy="45" r="4" fill="#e51148" opacity="0.6" />
-                                            <circle id="exec-endpoint" cx="180" cy="77" r="5" fill="#102a47" />
-                                        </svg>
-                                        <div id="radial-tooltip"
-                                            class="absolute bg-primary text-white text-[10px] font-bold px-3 py-2 rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-10"
-                                            style="top:16px;right:16px;">
-                                            <div id="tooltip-content">—</div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                        <div
-                                            class="flex items-center justify-between text-[9px] font-bold uppercase text-slate-400 mb-2 tracking-wider">
-                                            <span>Ene 2025</span><span>Hoy</span><span>Dic 2025</span>
+                                            class="dot-float-1 absolute top-4 right-10 w-20 h-20 bg-white/10 rounded-full blur-xl pointer-events-none">
                                         </div>
                                         <div
-                                            class="relative h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-visible">
-                                            <div class="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/20"
-                                                style="width:16%"></div>
-                                            <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full shadow"
-                                                style="left:16%">
-                                                <div
-                                                    class="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-white text-[8px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">
-                                                    Feb 2025</div>
+                                            class="dot-float-2 absolute bottom-2 right-4 w-12 h-12 bg-accent/20 rounded-full blur-lg pointer-events-none">
+                                        </div>
+                                        <div class="shimmer-bg absolute inset-0 pointer-events-none"></div>
+                                        <div class="relative flex items-start justify-between mb-3">
+                                            <div class="flex flex-col">
+                                                <span
+                                                    class="text-[9px] font-black uppercase tracking-[0.15em] text-white/50 mb-0.5">Ahorro
+                                                    Ejecutado</span>
+                                                <span class="text-xs font-semibold text-white/60">Año 2025</span>
                                             </div>
-                                            <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-accent border-2 border-white rounded-full shadow"
-                                                style="left:100%">
-                                                <div
-                                                    class="absolute -top-6 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">
-                                                    Meta</div>
+                                            <div
+                                                class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-white"
+                                                    style="font-size:22px;">check_circle</span>
+                                            </div>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="text-3xl font-black tracking-tight leading-none">$<span
+                                                    class="counter" id="counter-ejecutado">0</span></div>
+                                            <div class="text-xs text-white/40 font-mono mt-1">COP</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tarjeta Proyectado -->
+                                    <div class="stat-card relative overflow-hidden rounded-2xl border-2 border-dashed border-accent/40 bg-white dark:bg-slate-900 p-5 shadow-lg"
+                                        style="animation-delay:0.25s">
+                                        <div
+                                            class="dot-float-3 absolute top-3 right-8 w-16 h-16 bg-accent/10 rounded-full blur-xl pointer-events-none">
+                                        </div>
+                                        <div class="flex items-start justify-between mb-3">
+                                            <div class="flex flex-col">
+                                                <span
+                                                    class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400 mb-0.5">Proyección
+                                                    Anual</span>
+                                                <span class="text-xs font-semibold text-slate-400">Al cabo de 1
+                                                    año</span>
+                                            </div>
+                                            <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center"
+                                                style="animation: pulseGlow 2s ease infinite;">
+                                                <span class="material-symbols-outlined text-accent"
+                                                    style="font-size:22px;">trending_up</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div
+                                                class="text-3xl font-black tracking-tight leading-none text-primary dark:text-white">
+                                                $<span class="counter" id="counter-proyectado">0</span></div>
+                                            <div class="text-xs text-slate-400 font-mono mt-1">COP</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Barra de progreso -->
+                                    <div class="stat-card rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm"
+                                        style="animation-delay:0.4s">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span
+                                                class="text-[9px] font-black uppercase tracking-wider text-slate-500">Avance
+                                                hacia la meta</span>
+                                            <span id="pct-label" class="text-sm font-black text-accent">0%</span>
+                                        </div>
+                                        <div id="progress-container"
+                                            class="relative h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2.5">
+                                            <div class="progress-fill h-full rounded-full relative overflow-hidden"
+                                                id="main-progress-bar"
+                                                style="--target-width: 26.2%; background: linear-gradient(90deg, #102a47 0%, #e51148 100%);">
+                                                <div class="shimmer-bg absolute inset-0"></div>
+                                            </div>
+                                            <div id="progress-marker"
+                                                class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-accent rounded-full shadow-md transition-all duration-[2s] ease-out"
+                                                style="left: 0%; opacity:0;"></div>
+                                        </div>
+                                        <div class="flex justify-between text-[9px] font-bold text-slate-400 font-mono">
+                                            <span>$0</span><span id="mid-label">$4.7M</span><span>$9.4M</span>
+                                        </div>
+                                        <div class="mt-3 space-y-1.5">
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <div class="w-2.5 h-2.5 rounded-sm bg-primary flex-shrink-0"></div>
+                                                <span class="text-slate-500 flex-1">Ejecutado</span>
+                                                <span
+                                                    class="font-bold text-primary dark:text-white font-mono text-[11px]">$2.468.287</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <div class="w-2.5 h-2.5 rounded-sm bg-accent flex-shrink-0"></div>
+                                                <span class="text-slate-500 flex-1">Faltante proyectado</span>
+                                                <span
+                                                    class="font-bold text-accent font-mono text-[11px]">$6.942.269</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div><!-- /grid consolidado -->
+
+                                <!-- SVG Radial -->
+                                <div class="lg:col-span-7">
+                                    <div
+                                        class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm h-full p-5 flex flex-col">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <span
+                                                class="text-[9px] font-black uppercase tracking-wider text-slate-500">Distribución
+                                                por anillos</span>
+                                            <div class="flex items-center gap-3 text-[9px] font-bold">
+                                                <span class="flex items-center gap-1.5"><span
+                                                        class="inline-block w-2.5 h-2.5 rounded-full bg-primary"></span>Ejecutado</span>
+                                                <span class="flex items-center gap-1.5"><span
+                                                        class="inline-block w-2.5 h-2.5 rounded-full bg-accent"></span>Proyectado</span>
+                                                <span class="flex items-center gap-1.5"><span
+                                                        class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200"></span>Pendiente</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex flex-col items-center justify-center relative"
+                                            id="svg-container">
+                                            <svg id="radial-svg" viewBox="0 0 360 300" width="100%" height="100%"
+                                                style="max-height:330px;">
+                                                <defs>
+                                                    <linearGradient id="grad-ejecutado" x1="0%" y1="0%" x2="100%"
+                                                        y2="0%">
+                                                        <stop offset="0%" stop-color="#102a47" />
+                                                        <stop offset="100%" stop-color="#1e4d80" />
+                                                    </linearGradient>
+                                                    <linearGradient id="grad-proyectado" x1="0%" y1="0%" x2="100%"
+                                                        y2="0%">
+                                                        <stop offset="0%" stop-color="#e51148" />
+                                                        <stop offset="100%" stop-color="#ff4d80" />
+                                                    </linearGradient>
+                                                    <filter id="glow-blue">
+                                                        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                                        <feMerge>
+                                                            <feMergeNode in="coloredBlur" />
+                                                            <feMergeNode in="SourceGraphic" />
+                                                        </feMerge>
+                                                    </filter>
+                                                    <filter id="glow-red">
+                                                        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                                                        <feMerge>
+                                                            <feMergeNode in="coloredBlur" />
+                                                            <feMergeNode in="SourceGraphic" />
+                                                        </feMerge>
+                                                    </filter>
+                                                </defs>
+                                                <circle cx="180" cy="155" r="110" fill="none" stroke="#f1f5f9"
+                                                    stroke-width="16" />
+                                                <circle id="arc-proyectado" cx="180" cy="155" r="110" fill="none"
+                                                    stroke="url(#grad-proyectado)" stroke-width="16"
+                                                    stroke-linecap="round" transform="rotate(-90 180 155)"
+                                                    style="--dash-total:691.15;stroke-dasharray:691.15;stroke-dashoffset:691.15;"
+                                                    class="arc-proyectado" filter="url(#glow-red)" />
+                                                <circle cx="180" cy="155" r="78" fill="none" stroke="#f1f5f9"
+                                                    stroke-width="16" />
+                                                <circle id="arc-ejecutado" cx="180" cy="155" r="78" fill="none"
+                                                    stroke="url(#grad-ejecutado)" stroke-width="16"
+                                                    stroke-linecap="round" transform="rotate(-90 180 155)"
+                                                    style="--dash-total:490.09;stroke-dasharray:490.09;stroke-dashoffset:490.09;"
+                                                    class="arc-ejecutado" filter="url(#glow-blue)" />
+                                                <text x="180" y="142" text-anchor="middle"
+                                                    font-family="Outfit,sans-serif" font-weight="900" font-size="22"
+                                                    fill="#102a47" id="center-pct">26%</text>
+                                                <text x="180" y="162" text-anchor="middle"
+                                                    font-family="Outfit,sans-serif" font-weight="500" font-size="9"
+                                                    fill="#94a3b8" letter-spacing="2">EJECUTADO</text>
+                                                <text x="180" y="290" text-anchor="middle"
+                                                    font-family="Outfit,sans-serif" font-weight="700" font-size="9"
+                                                    fill="#e51148" letter-spacing="1.5">PROYECCIÓN ANUAL · 100%</text>
+                                                <circle cx="180" cy="45" r="4" fill="#e51148" opacity="0.6" />
+                                                <circle id="exec-endpoint" cx="180" cy="77" r="5" fill="#102a47" />
+                                            </svg>
+                                            <div id="radial-tooltip"
+                                                class="absolute bg-primary text-white text-[10px] font-bold px-3 py-2 rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-10"
+                                                style="top:16px;right:16px;">
+                                                <div id="tooltip-content">—</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                            <div
+                                                class="flex items-center justify-between text-[9px] font-bold uppercase text-slate-400 mb-2 tracking-wider">
+                                                <span>Ene 2025</span><span>Hoy</span><span>Dic 2025</span>
+                                            </div>
+                                            <div
+                                                class="relative h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-visible">
+                                                <div class="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/20"
+                                                    style="width:16%"></div>
+                                                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full shadow"
+                                                    style="left:16%">
+                                                    <div
+                                                        class="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-white text-[8px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                        Feb 2025</div>
+                                                </div>
+                                                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-accent border-2 border-white rounded-full shadow"
+                                                    style="left:100%">
+                                                    <div
+                                                        class="absolute -top-6 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                        Meta</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- /grid consolidado -->
+
+                        </div><!-- /panel-2025 -->
+
+                        <!-- ══ PANEL 2026 ══ -->
+                        <div id="panel-2026" style="display:none;">
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                                <div class="lg:col-span-5 flex flex-col gap-4">
+                                    <!-- Tarjeta Ejecutado 2026 -->
+                                    <div class="stat-card relative overflow-hidden rounded-2xl bg-primary p-5 text-white shadow-xl shadow-primary/20"
+                                        style="animation-delay:0.1s">
+                                        <div
+                                            class="dot-float-1 absolute top-4 right-10 w-20 h-20 bg-white/10 rounded-full blur-xl pointer-events-none">
+                                        </div>
+                                        <div
+                                            class="dot-float-2 absolute bottom-2 right-4 w-12 h-12 bg-accent/20 rounded-full blur-lg pointer-events-none">
+                                        </div>
+                                        <div class="shimmer-bg absolute inset-0 pointer-events-none"></div>
+                                        <div class="relative flex items-start justify-between mb-3">
+                                            <div class="flex flex-col">
+                                                <span
+                                                    class="text-[9px] font-black uppercase tracking-[0.15em] text-white/50 mb-0.5">Ahorro
+                                                    Ejecutado</span>
+                                                <span class="text-xs font-semibold text-white/60">Año 2026</span>
+                                            </div>
+                                            <div
+                                                class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-white"
+                                                    style="font-size:22px;">check_circle</span>
+                                            </div>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="text-3xl font-black tracking-tight leading-none">$<span
+                                                    class="counter" id="counter-ejecutado-26">0</span></div>
+                                            <div class="text-xs text-white/40 font-mono mt-1">COP</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tarjeta Proyectado 2026 -->
+                                    <div class="stat-card relative overflow-hidden rounded-2xl border-2 border-dashed border-accent/40 bg-white dark:bg-slate-900 p-5 shadow-lg"
+                                        style="animation-delay:0.25s">
+                                        <div
+                                            class="dot-float-3 absolute top-3 right-8 w-16 h-16 bg-accent/10 rounded-full blur-xl pointer-events-none">
+                                        </div>
+                                        <div class="flex items-start justify-between mb-3">
+                                            <div class="flex flex-col">
+                                                <span
+                                                    class="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400 mb-0.5">Proyección
+                                                    Anual</span>
+                                                <span class="text-xs font-semibold text-slate-400">Al cabo de 1
+                                                    año</span>
+                                            </div>
+                                            <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center"
+                                                style="animation: pulseGlow 2s ease infinite;">
+                                                <span class="material-symbols-outlined text-accent"
+                                                    style="font-size:22px;">trending_up</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div
+                                                class="text-3xl font-black tracking-tight leading-none text-primary dark:text-white">
+                                                $<span class="counter" id="counter-proyectado-26">0</span></div>
+                                            <div class="text-xs text-slate-400 font-mono mt-1">COP</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Barra de progreso 2026 -->
+                                    <div class="stat-card rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm"
+                                        style="animation-delay:0.4s">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <span
+                                                class="text-[9px] font-black uppercase tracking-wider text-slate-500">Avance
+                                                hacia la meta</span>
+                                            <span id="pct-label-26" class="text-sm font-black text-accent">0%</span>
+                                        </div>
+                                        <div
+                                            class="relative h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2.5">
+                                            <div class="progress-fill h-full rounded-full relative overflow-hidden"
+                                                id="main-progress-bar-26"
+                                                style="--target-width: 35.8%; background: linear-gradient(90deg, #102a47 0%, #e51148 100%);">
+                                                <div class="shimmer-bg absolute inset-0"></div>
+                                            </div>
+                                            <div id="progress-marker-26"
+                                                class="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-accent rounded-full shadow-md transition-all duration-[2s] ease-out"
+                                                style="left: 0%; opacity:0;"></div>
+                                        </div>
+                                        <div class="flex justify-between text-[9px] font-bold text-slate-400 font-mono">
+                                            <span>$0</span><span>$3,8M</span><span>$7,6M</span>
+                                        </div>
+                                        <div class="mt-3 space-y-1.5">
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <div class="w-2.5 h-2.5 rounded-sm bg-primary flex-shrink-0"></div>
+                                                <span class="text-slate-500 flex-1">Ejecutado</span>
+                                                <span
+                                                    class="font-bold text-primary dark:text-white font-mono text-[11px]">$2.730.963</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <div class="w-2.5 h-2.5 rounded-sm bg-accent flex-shrink-0"></div>
+                                                <span class="text-slate-500 flex-1">Faltante proyectado</span>
+                                                <span
+                                                    class="font-bold text-accent font-mono text-[11px]">$4.897.685</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SVG Radial 2026 -->
+                                <div class="lg:col-span-7">
+                                    <div
+                                        class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm h-full p-5 flex flex-col">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <span
+                                                class="text-[9px] font-black uppercase tracking-wider text-slate-500">Distribución
+                                                por anillos</span>
+                                            <div class="flex items-center gap-3 text-[9px] font-bold">
+                                                <span class="flex items-center gap-1.5"><span
+                                                        class="inline-block w-2.5 h-2.5 rounded-full bg-primary"></span>Ejecutado</span>
+                                                <span class="flex items-center gap-1.5"><span
+                                                        class="inline-block w-2.5 h-2.5 rounded-full bg-accent"></span>Proyectado</span>
+                                                <span class="flex items-center gap-1.5"><span
+                                                        class="inline-block w-2.5 h-2.5 rounded-full bg-slate-200"></span>Pendiente</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex flex-col items-center justify-center relative">
+                                            <svg id="radial-svg-26" viewBox="0 0 360 300" width="100%" height="100%"
+                                                style="max-height:330px;">
+                                                <defs>
+                                                    <linearGradient id="grad-ej-26" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" stop-color="#102a47" />
+                                                        <stop offset="100%" stop-color="#1e4d80" />
+                                                    </linearGradient>
+                                                    <linearGradient id="grad-pr-26" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" stop-color="#e51148" />
+                                                        <stop offset="100%" stop-color="#ff4d80" />
+                                                    </linearGradient>
+                                                    <filter id="glow-blue-26">
+                                                        <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                                                        <feMerge>
+                                                            <feMergeNode in="coloredBlur" />
+                                                            <feMergeNode in="SourceGraphic" />
+                                                        </feMerge>
+                                                    </filter>
+                                                    <filter id="glow-red-26">
+                                                        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                                                        <feMerge>
+                                                            <feMergeNode in="coloredBlur" />
+                                                            <feMergeNode in="SourceGraphic" />
+                                                        </feMerge>
+                                                    </filter>
+                                                </defs>
+                                                <circle cx="180" cy="155" r="110" fill="none" stroke="#f1f5f9"
+                                                    stroke-width="16" />
+                                                <circle id="arc-proyectado-26" cx="180" cy="155" r="110" fill="none"
+                                                    stroke="url(#grad-pr-26)" stroke-width="16" stroke-linecap="round"
+                                                    transform="rotate(-90 180 155)"
+                                                    style="--dash-total:691.15;stroke-dasharray:691.15;stroke-dashoffset:691.15;"
+                                                    class="arc-proyectado" filter="url(#glow-red-26)" />
+                                                <circle cx="180" cy="155" r="78" fill="none" stroke="#f1f5f9"
+                                                    stroke-width="16" />
+                                                <circle id="arc-ejecutado-26" cx="180" cy="155" r="78" fill="none"
+                                                    stroke="url(#grad-ej-26)" stroke-width="16" stroke-linecap="round"
+                                                    transform="rotate(-90 180 155)"
+                                                    style="--dash-total:490.09;stroke-dasharray:490.09;stroke-dashoffset:490.09;"
+                                                    class="arc-ejecutado" filter="url(#glow-blue-26)" />
+                                                <text x="180" y="142" text-anchor="middle"
+                                                    font-family="Outfit,sans-serif" font-weight="900" font-size="22"
+                                                    fill="#102a47" id="center-pct-26">36%</text>
+                                                <text x="180" y="162" text-anchor="middle"
+                                                    font-family="Outfit,sans-serif" font-weight="500" font-size="9"
+                                                    fill="#94a3b8" letter-spacing="2">EJECUTADO</text>
+                                                <text x="180" y="290" text-anchor="middle"
+                                                    font-family="Outfit,sans-serif" font-weight="700" font-size="9"
+                                                    fill="#e51148" letter-spacing="1.5">PROYECCIÓN ANUAL · 100%</text>
+                                                <circle cx="180" cy="45" r="4" fill="#e51148" opacity="0.6" />
+                                                <circle id="exec-endpoint-26" cx="180" cy="77" r="5" fill="#102a47" />
+                                            </svg>
+                                            <div id="radial-tooltip-26"
+                                                class="absolute bg-primary text-white text-[10px] font-bold px-3 py-2 rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap z-10"
+                                                style="top:16px;right:16px;">
+                                                <div id="tooltip-content-26">—</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                            <div
+                                                class="flex items-center justify-between text-[9px] font-bold uppercase text-slate-400 mb-2 tracking-wider">
+                                                <span>Ene 2026</span><span>Hoy</span><span>Dic 2026</span>
+                                            </div>
+                                            <div
+                                                class="relative h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-visible">
+                                                <div class="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/20"
+                                                    style="width:16%"></div>
+                                                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full shadow"
+                                                    style="left:16%">
+                                                    <div
+                                                        class="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-white text-[8px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                        Feb 2026</div>
+                                                </div>
+                                                <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-accent border-2 border-white rounded-full shadow"
+                                                    style="left:100%">
+                                                    <div
+                                                        class="absolute -top-6 left-1/2 -translate-x-1/2 bg-accent text-white text-[8px] font-black px-1.5 py-0.5 rounded whitespace-nowrap">
+                                                        Meta</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- /grid 2026 -->
+
+                        </div><!-- /panel-2026 -->
 
                         <!-- ═══════ ACTIVIDADES ═══════ -->
                         <div id="actividades-section" class="mt-8 act-panel">
@@ -1086,31 +1184,36 @@
 
                                 <!-- Header con stats -->
                                 <div
-                                    class="px-5 pt-4 pb-4 bg-gradient-to-r from-primary to-[#1a3f6b] relative overflow-hidden">
+                                    class="px-5 pt-4 pb-3.5 bg-gradient-to-r from-primary to-[#1a3f6b] relative overflow-hidden">
                                     <div class="shimmer-bg absolute inset-0 pointer-events-none"></div>
                                     <div class="relative flex flex-wrap items-center justify-between gap-3">
                                         <div>
                                             <div
-                                                class="text-[9px] font-black uppercase tracking-widest text-white/50 mb-2">
-                                                Actividades · Ahorro por proceso
-                                            </div>
+                                                class="text-[9px] font-black uppercase tracking-widest text-white/50 mb-1.5">
+                                                Actividades · Ahorro por proceso</div>
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <span id="act-stat-total" class="stat-pill bg-white/10 text-white">
-                                                    <span class="material-symbols-outlined">savings</span>
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size:14px;">savings</span>
                                                     <span>Total: —</span>
                                                 </span>
                                                 <span id="act-stat-count" class="stat-pill bg-white/10 text-white">
-                                                    <span class="material-symbols-outlined">format_list_numbered</span>
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size:14px;">format_list_numbered</span>
                                                     <span>0 actividades</span>
                                                 </span>
                                                 <span id="act-stat-avg" class="stat-pill bg-accent/30 text-white">
-                                                    <span class="material-symbols-outlined">avg_pace</span>
+                                                    <span class="material-symbols-outlined"
+                                                        style="font-size:14px;">avg_pace</span>
                                                     <span>Prom: —</span>
                                                 </span>
                                             </div>
                                         </div>
-                                        <!-- Búsqueda interna — wrapper corregido -->
-                                        <div class="act-search-wrapper">
+                                        <!-- Búsqueda interna -->
+                                        <div class="relative">
+                                            <span
+                                                class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                                style="font-size:15px; line-height:1; pointer-events:none;">search</span>
                                             <input id="act-search" type="text" placeholder="Buscar proceso…"
                                                 class="act-search" />
                                         </div>
@@ -1119,14 +1222,14 @@
 
                                 <div class="glow-sep"></div>
 
-                                <!-- ── Barra de filtros ── -->
+                                <!-- ── Barra de filtros compacta y organizada ── -->
                                 <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 space-y-2.5">
 
-                                    <!-- Fila 1 -->
+                                    <!-- Fila 1: Mostrar / Ordenar / Modo de visualización -->
                                     <div class="filter-row">
                                         <div class="filter-group">
                                             <span class="filter-label">Ver</span>
-                                            <div class="flex gap-1.5" id="ctrl-limit">
+                                            <div class="flex gap-1" id="ctrl-limit">
                                                 <button class="ctrl-chip active-pri" data-val="10"
                                                     onclick="actSetLimit(this,10)">Top 10</button>
                                                 <button class="ctrl-chip inactive" data-val="20"
@@ -1156,7 +1259,7 @@
 
                                         <div class="filter-group">
                                             <span class="filter-label">Métrica</span>
-                                            <div class="flex gap-1.5" id="ctrl-mode">
+                                            <div class="flex gap-1" id="ctrl-mode">
                                                 <button class="ctrl-chip active-pri" data-val="amount"
                                                     onclick="actSetMode(this,'amount')">Ahorro</button>
                                                 <button class="ctrl-chip inactive" data-val="reduction"
@@ -1169,11 +1272,11 @@
                                         </div>
                                     </div>
 
-                                    <!-- Fila 2 -->
+                                    <!-- Fila 2: Estatus / Área / Fecha / Monto mín -->
                                     <div class="filter-row">
                                         <div class="filter-group">
                                             <span class="filter-label">Estatus</span>
-                                            <div class="flex gap-1.5" id="ctrl-status">
+                                            <div class="flex gap-1" id="ctrl-status">
                                                 <button class="ctrl-chip active-pri" data-val="all"
                                                     onclick="actSetStatus(this,'all')">Todos</button>
                                                 <button class="ctrl-chip inactive" data-val="Realizado"
@@ -1196,15 +1299,15 @@
 
                                         <div class="filter-divider"></div>
 
-                                        <div class="filter-group" style="height:auto;">
+                                        <div class="filter-group">
                                             <span class="filter-label">Fecha</span>
                                             <input type="date" id="ctrl-date-from" class="act-date"
                                                 onchange="actApplyFilters()" />
-                                            <span class="text-slate-300 font-bold text-xs leading-none">–</span>
+                                            <span class="text-slate-300 font-bold text-xs">–</span>
                                             <input type="date" id="ctrl-date-to" class="act-date"
                                                 onchange="actApplyFilters()" />
                                             <button onclick="actClearDates()" class="ctrl-chip inactive"
-                                                style="padding: 0 9px; min-width:32px;">
+                                                style="padding:3px 7px;">
                                                 <span class="material-symbols-outlined"
                                                     style="font-size:14px;">close</span>
                                             </button>
@@ -1224,28 +1327,35 @@
                                         </div>
 
                                         <button onclick="actResetFilters()" class="ctrl-chip inactive ml-auto"
-                                            style="gap:4px;">
+                                            style="gap:3px;">
                                             <span class="material-symbols-outlined"
                                                 style="font-size:14px;">restart_alt</span>
                                             Resetear
                                         </button>
                                     </div>
 
-                                    <!-- Tags filtros activos -->
+                                    <!-- Tags de filtros activos -->
                                     <div id="active-filters-strip"
                                         class="hidden flex flex-wrap gap-1.5 pt-2 border-t border-slate-100"></div>
                                 </div>
 
-                                <!-- ── Eje de referencia — usa nueva clase axis-header ── -->
+                                <!-- ── Eje de referencia ── -->
                                 <div class="px-5 pt-3.5 pb-1">
-                                    <div class="axis-header">
-                                        <div class="chart-label-head">Proceso</div>
-                                        <div class="axis-track">
-                                            <span class="axis-num">$0</span>
-                                            <span id="axis-mid" class="axis-num">—</span>
-                                            <span id="axis-max" class="axis-num">—</span>
+                                    <div class="flex items-center"
+                                        style="padding-bottom:5px;border-bottom:1px solid #f1f5f9;">
+                                        <div
+                                            class="chart-label text-[9px] font-black uppercase tracking-wider text-slate-400 text-right pr-3">
+                                            Proceso</div>
+                                        <div class="flex-1 flex items-center justify-between px-2">
+                                            <span class="text-[8.5px] font-bold text-slate-300 font-mono">$0</span>
+                                            <span id="axis-mid"
+                                                class="text-[8.5px] font-bold text-slate-300 font-mono">—</span>
+                                            <span id="axis-max"
+                                                class="text-[8.5px] font-bold text-slate-300 font-mono">—</span>
                                         </div>
-                                        <div class="chart-meta-head">Detalle</div>
+                                        <div
+                                            class="chart-meta text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                            Detalle</div>
                                     </div>
                                 </div>
 
@@ -1439,7 +1549,7 @@
         </div>
     </div>
 
-    <!-- ═══════════ JAVASCRIPT — sin cambios funcionales ═══════════ -->
+    <!-- ═══════════ JAVASCRIPT ═══════════ -->
     <script>
         const API = 'https://proyectossyp.onrender.com/api';
         const fmt = n => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
@@ -1532,6 +1642,7 @@
             loadAhorros();
         }
 
+        /* ══ SELECT PROCESOS ══ */
         async function loadProcesosForSelect() {
             try {
                 const procesos = await fetch(`${API}/proyectos`).then(r => r.json());
@@ -1544,6 +1655,7 @@
             } catch (e) { console.warn('Error cargando procesos.'); }
         }
 
+        /* ══ BUSCADOR TABLA ══ */
         document.getElementById('search-ahorros').addEventListener('input', function () {
             const q = this.value.toLowerCase();
             renderAhorros(allAhorros.filter(s =>
@@ -1553,6 +1665,7 @@
             ));
         });
 
+        /* ══ MODAL AHORRO ══ */
         const modal = document.getElementById('modal-ahorro');
         document.getElementById('btn-nuevo-ahorro').onclick = () => modal.classList.remove('hidden');
         document.getElementById('modal-close').onclick = () => modal.classList.add('hidden');
@@ -1602,6 +1715,7 @@
             document.getElementById('ahorro-encargado').value = p ? (p.encargado || '') : '';
         });
 
+        /* ══ MODAL CHART ══ */
         const modalChart = document.getElementById('modal-chart');
         document.getElementById('modal-chart-close').onclick = () => modalChart.classList.add('hidden');
 
@@ -1617,7 +1731,10 @@
                 type: 'bar',
                 data: {
                     labels: ['ANTES', 'ACTUAL', 'AHORRO'],
-                    datasets: [{ label: 'COP ($)', data: [saving.total_antes, saving.total_actual, saving.amount], backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(30,77,128,0.9)', 'rgba(229,17,72,0.9)'], borderRadius: 5 }]
+                    datasets: [{
+                        label: 'COP ($)', data: [saving.total_antes, saving.total_actual, saving.amount],
+                        backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(30,77,128,0.9)', 'rgba(229,17,72,0.9)'], borderRadius: 5
+                    }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: tt }, scales: { y: { beginAtZero: true, ticks: { callback: v => fmtShort(v) } } } }
             });
@@ -1625,7 +1742,10 @@
                 type: 'doughnut',
                 data: {
                     labels: ['Total Actual', 'Ahorro Logrado'],
-                    datasets: [{ data: [saving.total_actual, saving.amount], backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(229,17,72,0.9)'], hoverOffset: 4, borderWidth: 2 }]
+                    datasets: [{
+                        data: [saving.total_actual, saving.amount],
+                        backgroundColor: ['rgba(16,42,71,0.9)', 'rgba(229,17,72,0.9)'], hoverOffset: 4, borderWidth: 2
+                    }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { tooltip: tt, legend: { position: 'bottom' } } }
             });
@@ -1673,20 +1793,23 @@
            ACTIVIDADES – motor de filtrado + gráfica custom
         ══════════════════════════════════════════════════════ */
         (function () {
+            // ── Brand colors for bars (azul y rojo del sistema) ──
             const STATUS_GRAD = {
-                'Realizado': 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',
-                'Proyectado': 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',
-                'Pendiente': 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',
+                'Realizado': 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',   // azul primario
+                'Proyectado': 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',   // rojo accent
+                'Pendiente': 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',   // azul→rojo
             };
             const STATUS_DOT = {
                 'Realizado': '#102a47',
                 'Proyectado': '#e51148',
                 'Pendiente': '#94a3b8',
             };
+
+            // Reduction-based: use system palette shades
             const REDUCTION_GRAD = {
-                high: 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',
-                mid: 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',
-                low: 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',
+                high: 'linear-gradient(90deg,#102a47 0%,#1e4d80 100%)',   // >75% → deep blue
+                mid: 'linear-gradient(90deg,#1a3f6b 0%,#e51148 100%)',   // 40-75% → blue→red
+                low: 'linear-gradient(90deg,#e51148 0%,#c20e3e 100%)',   // <40% → red
             };
 
             let state = { limit: 10, sort: 'amount_desc', status: 'all', mode: 'amount', dateFrom: '', dateTo: '', area: 'all', minAmount: 0, search: '' };
@@ -1846,63 +1969,46 @@
                     const valFmt = isPercent ? fmtPct(val) : fmtShort(val);
                     const dotCol = STATUS_DOT[item.status] || '#94a3b8';
                     const delay = (i * 0.04).toFixed(3);
-
-                    // Format date nicely (remove T00:00:00... suffix)
-                    const rawDate = (item.date || '—');
-                    const niceDate = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
-
                     let sub1 = '', sub2 = '';
-                    if (state.mode === 'amount') { sub1 = niceDate; sub2 = item.status; }
+                    if (state.mode === 'amount') { sub1 = item.date || '—'; sub2 = item.status; }
                     if (state.mode === 'reduction') { sub1 = fmtShort(item.total_antes || 0) + ' → ' + fmtShort(item.total_actual || 0); sub2 = item.status; }
-                    if (state.mode === 'before') { sub1 = 'Actual: ' + fmtShort(item.total_actual || 0); sub2 = niceDate; }
-                    if (state.mode === 'after') { sub1 = 'Ahorro: ' + fmtShort(item.amount); sub2 = niceDate; }
-
+                    if (state.mode === 'before') { sub1 = 'Actual: ' + fmtShort(item.total_actual || 0); sub2 = item.date || '—'; }
+                    if (state.mode === 'after') { sub1 = 'Ahorro: ' + fmtShort(item.amount); sub2 = item.date || '—'; }
                     const ttData = JSON.stringify({
                         name: item.project_name, area: item.project_area || '—',
                         amount: fmt(item.amount), before: fmt(item.total_antes || 0),
                         after: fmt(item.total_actual || 0), reduction: fmtPct(item._reduction),
-                        status: item.status, date: niceDate
+                        status: item.status, date: item.date || '—'
                     }).replace(/"/g, '&quot;');
-
-                    // Decide si mostrar valor dentro (barra ancha) o fuera (barra corta)
-                    const isWide = parseFloat(pct) >= 20;
-
                     return `
                     <div class="chart-row" style="animation:actFadeUp .4s cubic-bezier(.16,1,.3,1) ${delay}s both;"
                         data-tt="${ttData}" onmouseenter="__actShowTT(event,this)" onmousemove="__actMoveTT(event)" onmouseleave="__actHideTT()">
                         <div class="chart-label" title="${item.project_name}">
-                            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${dotCol};margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>${label}
+                            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dotCol};margin-right:4px;vertical-align:middle;flex-shrink:0;"></span>${label}
                         </div>
-                        <div class="chart-track" style="overflow:visible;position:relative;">
+                        <div class="chart-track">
                             <div class="chart-grid" style="left:25%"></div>
                             <div class="chart-grid" style="left:50%"></div>
                             <div class="chart-grid" style="left:75%"></div>
-                            <div class="chart-bar" style="width:${pct}%;background:${grad};animation-delay:${delay}s;overflow:hidden;">
+                            <div class="chart-bar" style="width:${pct}%;background:${grad};animation-delay:${delay}s;">
                                 <div class="chart-bar-shimmer"></div>
-                                ${isWide
-                            ? `<span class="chart-val" style="animation-delay:${(parseFloat(delay) + .55).toFixed(2)}s;">${valFmt}</span>`
-                            : ''
-                        }
+                                <span class="chart-val" style="animation-delay:${(parseFloat(delay) + .55).toFixed(2)}s;">${valFmt}</span>
                             </div>
-                            ${!isWide
-                            ? `<span style="position:absolute;left:calc(${pct}% + 6px);top:50%;transform:translateY(-50%);font-size:11px;font-weight:900;color:#334155;white-space:nowrap;opacity:0;animation:labelPop .4s ease ${(parseFloat(delay) + .55).toFixed(2)}s forwards;pointer-events:none;font-family:'Outfit',sans-serif;">${valFmt}</span>`
-                            : ''
-                        }
                         </div>
                         <div class="chart-meta">
-                            <span>${sub1}</span>
-                            <span>${sub2}</span>
+                            <span style="font-size:9.5px;font-weight:700;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sub1}</span>
+                            <span style="font-size:11px;color:#94a3b8;">${sub2}</span>
                         </div>
                     </div>`;
                 }).join('');
-                container.innerHTML = `<div style="display:flex;flex-direction:column;gap:4px;padding-top:6px;">${rows}</div>`;
+                container.innerHTML = `<div style="display:flex;flex-direction:column;gap:3px;padding-top:6px;">${rows}</div>`;
             }
 
             window.__actShowTT = (e, el) => {
                 const d = JSON.parse(el.dataset.tt.replace(/&quot;/g, '"'));
                 showTooltip(e, `
                     <div style="font-size:13px;font-weight:900;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px;">${d.name}</div>
-                    <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 9px;font-size:10px;">
+                    <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 9px;font-size:9.5px;">
                         <span style="opacity:.5">Área</span><span>${d.area}</span>
                         <span style="opacity:.5">Ahorro</span><span style="color:#ff6b94;font-weight:900;">${d.amount}</span>
                         <span style="opacity:.5">Antes</span><span>${d.before}</span>
@@ -1955,6 +2061,72 @@
             actObs.observe(document.getElementById('actividades-section'));
 
         }()); /* fin IIFE actividades */
+
+        /* ══ YEAR TABS ══ */
+        const EJ26 = 2730963;
+        const PR26 = 7628648;
+        const PCT26 = (EJ26 / PR26 * 100).toFixed(1);
+        let tab26Animated = false;
+
+        function switchYearTab(year) {
+            const btn25 = document.getElementById('tab-btn-2025');
+            const btn26 = document.getElementById('tab-btn-2026');
+            const p25 = document.getElementById('panel-2025');
+            const p26 = document.getElementById('panel-2026');
+            const ACTIVE = 'flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black tracking-wide uppercase transition-all bg-primary text-white shadow-sm';
+            const INACTIVE = 'flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black tracking-wide uppercase transition-all text-slate-500 hover:text-primary';
+            if (year === '2025') {
+                btn25.className = ACTIVE; btn26.className = INACTIVE;
+                p25.style.display = ''; p26.style.display = 'none';
+            } else {
+                btn26.className = ACTIVE; btn25.className = INACTIVE;
+                p25.style.display = 'none'; p26.style.display = '';
+                if (!tab26Animated) {
+                    tab26Animated = true;
+                    setTimeout(() => {
+                        animateCounter(document.getElementById('counter-ejecutado-26'), 0, EJ26, 2000, formatCOP);
+                        animateCounter(document.getElementById('counter-proyectado-26'), 0, PR26, 2500, formatCOP);
+                    }, 50);
+                    setTimeout(() => {
+                        const el = document.getElementById('pct-label-26');
+                        let c = 0, t = parseFloat(PCT26);
+                        const iv = setInterval(() => { c += .5; if (c >= t) { c = t; clearInterval(iv); } el.textContent = c.toFixed(1) + '%'; }, 30);
+                    }, 250);
+                    setTimeout(() => {
+                        document.getElementById('main-progress-bar-26').parentElement.classList.add('progress-animated');
+                        const m = document.getElementById('progress-marker-26');
+                        m.style.left = PCT26 + '%'; m.style.opacity = '1';
+                    }, 300);
+                    setTimeout(() => {
+                        document.getElementById('arc-proyectado-26').style.strokeDashoffset = '0';
+                        const pct = EJ26 / PR26, circ = 490.09;
+                        document.getElementById('arc-ejecutado-26').style.strokeDashoffset = String(circ * (1 - pct));
+                        const cp = document.getElementById('center-pct-26');
+                        let c = 0;
+                        const iv = setInterval(() => { c += .5; if (c >= parseFloat(PCT26)) { c = parseFloat(PCT26); clearInterval(iv); } cp.textContent = Math.round(c) + '%'; }, 40);
+                        const ang = (-90 + pct * 360) * (Math.PI / 180), r = 78, cx2 = 180, cy2 = 155;
+                        setTimeout(() => {
+                            const ep = document.getElementById('exec-endpoint-26');
+                            ep.setAttribute('cx', (cx2 + r * Math.cos(ang)).toFixed(1));
+                            ep.setAttribute('cy', (cy2 + r * Math.sin(ang)).toFixed(1));
+                        }, 1800);
+                    }, 500);
+                }
+            }
+        }
+
+        document.getElementById('arc-ejecutado-26').addEventListener('mouseenter', () => {
+            const t = document.getElementById('radial-tooltip-26');
+            document.getElementById('tooltip-content-26').innerHTML = `<div>Ejecutado 2026</div><div class="text-blue-200 mt-0.5">${fmt(EJ26)} · ${PCT26}%</div>`;
+            t.style.opacity = '1';
+        });
+        document.getElementById('arc-ejecutado-26').addEventListener('mouseleave', () => { document.getElementById('radial-tooltip-26').style.opacity = '0'; });
+        document.getElementById('arc-proyectado-26').addEventListener('mouseenter', () => {
+            const t = document.getElementById('radial-tooltip-26');
+            document.getElementById('tooltip-content-26').innerHTML = `<div>Proyección Anual 2026</div><div class="text-red-200 mt-0.5">${fmt(PR26)} · 100%</div>`;
+            t.style.opacity = '1';
+        });
+        document.getElementById('arc-proyectado-26').addEventListener('mouseleave', () => { document.getElementById('radial-tooltip-26').style.opacity = '0'; });
 
         /* ══ INIT ══ */
         loadAhorros();
