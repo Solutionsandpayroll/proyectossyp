@@ -43,8 +43,39 @@
             background: #cbd5e1;
             border-radius: 10px;
         }
+
+        /* Botón de descarga con animación sutil */
+        .btn-download {
+            transition: all 0.18s ease;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-download:active {
+            transform: translateY(0px) scale(0.96);
+        }
+
+        /* Pulse al cargar el archivo */
+        @keyframes pulse-once {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 42, 71, 0.3);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(16, 42, 71, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 42, 71, 0);
+            }
+        }
+
+        .pulse-once {
+            animation: pulse-once 0.6s ease-out;
+        }
     </style>
-    <!-- Guard: accesible a todos, adapta funciones según rol -->
     <script src="auth-guard.js" data-page="tickets"></script>
 </head>
 
@@ -101,7 +132,6 @@
                 <div>
                     <h2 class="text-2xl font-black text-primary dark:text-slate-100 tracking-tight">Gestión de Tickets
                     </h2>
-                    <!-- Aviso de modo invitado -->
                     <p id="guest-notice"
                         class="hidden text-xs text-amber-600 font-semibold mt-0.5 flex items-center gap-1">
                         <span class="material-symbols-outlined text-sm">info</span>
@@ -117,7 +147,7 @@
 
             <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <!-- Buscador (solo admin lo necesita realmente) -->
+
                     <div class="relative">
                         <span
                             class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
@@ -126,7 +156,6 @@
                             placeholder="Buscar tickets por asunto, prioridad o estatus..." type="text" />
                     </div>
 
-                    <!-- Tabla -->
                     <div
                         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
@@ -142,6 +171,9 @@
                                             Prioridad</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
                                             Estatus</th>
+                                        <!-- ▼ NUEVA COLUMNA ADJUNTO ▼ -->
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Adjunto</th>
                                         <th
                                             class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
                                             Acciones</th>
@@ -149,7 +181,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="tbody-tickets">
                                     <tr>
-                                        <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 text-sm">
                                             <span
                                                 class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
                                             No hay tickets registrados aún.
@@ -160,7 +192,6 @@
                         </div>
                     </div>
 
-                    <!-- Hint para invitado si no tiene tickets -->
                     <div id="guest-empty-hint" class="hidden text-center py-4">
                         <p class="text-sm text-slate-400">¿Necesitas reportar un problema?</p>
                         <p class="text-xs text-slate-400 mt-1">Crea un ticket con el botón <strong
@@ -230,10 +261,23 @@
         </div>
     </div>
 
+    <!-- ═══ MODAL: PREVIEW DE IMAGEN ═══ -->
+    <div id="modal-preview"
+        class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="relative max-w-3xl w-full mx-4">
+            <button id="preview-close"
+                class="absolute -top-10 right-0 text-white/70 hover:text-white transition-colors flex items-center gap-1 text-sm font-semibold">
+                <span class="material-symbols-outlined">close</span> Cerrar
+            </button>
+            <img id="preview-img" src="" alt="Adjunto"
+                class="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl" />
+        </div>
+    </div>
+
     <script>
         const API = 'https://proyectossyp.onrender.com/api';
+        const BASE_URL = 'https://proyectossyp.onrender.com';  // base para construir URLs de adjuntos
 
-        // IDs de tickets creados en esta sesión (para usuario default)
         const SESSION_KEY = 'syp_session_ticket_ids';
         function getSessionTicketIds() {
             try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]'); } catch { return []; }
@@ -257,6 +301,35 @@
             'Cerrado': 'bg-slate-50 text-slate-500',
         };
 
+        // ── Determina el ícono según extensión del archivo ──────────────────────────
+        function fileIcon(filename) {
+            if (!filename) return 'attach_file';
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return 'image';
+            if (['pdf'].includes(ext)) return 'picture_as_pdf';
+            if (['xls', 'xlsx', 'csv'].includes(ext)) return 'table_chart';
+            if (['doc', 'docx'].includes(ext)) return 'description';
+            if (['zip', 'rar', '7z'].includes(ext)) return 'folder_zip';
+            return 'attach_file';
+        }
+
+        // ── Nombre corto para mostrar en la celda ───────────────────────────────────
+        function shortName(path) {
+            if (!path) return '';
+            // El path es tipo "uploads/1234567-miarchivo.pdf" → devolver "miarchivo.pdf"
+            const filename = path.split('/').pop();
+            // Quitar el prefijo timestamp-random-
+            const clean = filename.replace(/^\d+-\d+-/, '');
+            return clean.length > 22 ? clean.slice(0, 19) + '...' : clean;
+        }
+
+        // ── Detecta si el adjunto es una imagen ─────────────────────────────────────
+        function isImage(path) {
+            if (!path) return false;
+            const ext = path.split('.').pop().toLowerCase();
+            return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+        }
+
         let allTickets = [];
 
         function renderTickets(data) {
@@ -264,9 +337,9 @@
             const tbody = document.getElementById('tbody-tickets');
 
             if (!data.length) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
-                <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
-                No hay tickets registrados aún.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400 text-sm">
+            <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
+            No hay tickets registrados aún.</td></tr>`;
                 if (!isAdmin) document.getElementById('guest-empty-hint').classList.remove('hidden');
                 return;
             }
@@ -275,20 +348,72 @@
             tbody.innerHTML = data.map(t => {
                 const pc = priorityColor[t.priority] || 'bg-slate-100 text-slate-600';
                 const sc = statusColor[t.status] || 'bg-slate-50 text-slate-500';
-                // Botón eliminar solo para admin
+
+                // ── Celda de adjunto ─────────────────────────────────────────────
+                let adjuntoCell = `<span class="text-slate-300 text-xs italic">Sin adjunto</span>`;
+
+                if (t.attachment) {
+                    const fileUrl = `${BASE_URL}/${t.attachment}`;
+                    const icon = fileIcon(t.attachment);
+                    const name = shortName(t.attachment);
+                    const imgPreview = isImage(t.attachment)
+                        ? `<button onclick="openPreview('${fileUrl}')"
+                            title="Vista previa"
+                            class="btn-download inline-flex items-center gap-1 px-2 py-1 rounded-md
+                                   bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600
+                                   text-xs font-semibold transition-colors">
+                            <span class="material-symbols-outlined text-base">visibility</span>
+                       </button>`
+                        : '';
+
+                    adjuntoCell = `
+                    <div class="flex items-center gap-2">
+                        <!-- Ícono del tipo de archivo -->
+                        <span class="material-symbols-outlined text-lg text-slate-400">${icon}</span>
+
+                        <!-- Nombre corto -->
+                        <span class="text-xs text-slate-600 dark:text-slate-300 font-medium max-w-[120px] truncate"
+                              title="${name}">${name}</span>
+
+                        <!-- Botón preview (solo imágenes) -->
+                        ${imgPreview}
+
+                        <!-- Botón descargar -->
+                        <a href="${fileUrl}"
+                           download
+                           target="_blank"
+                           title="Descargar adjunto"
+                           class="btn-download inline-flex items-center gap-1 px-2.5 py-1 rounded-md
+                                  bg-primary/5 hover:bg-primary text-primary hover:text-white
+                                  text-xs font-bold transition-all">
+                            <span class="material-symbols-outlined text-base">download</span>
+                            Bajar
+                        </a>
+                    </div>`;
+                }
+
+                // ── Botón eliminar solo admin ─────────────────────────────────────
                 const deleteBtn = isAdmin
-                    ? `<button onclick="deleteTicket(${t.id})" class="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                    ? `<button onclick="deleteTicket(${t.id})"
+                        class="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
+                        title="Eliminar ticket">
                        <span class="material-symbols-outlined text-xl">delete</span>
                    </button>`
                     : '';
+
                 return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
-                <td class="px-6 py-4 text-sm text-slate-500">${t.date || '—'}</td>
+                <td class="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">${t.date || '—'}</td>
                 <td class="px-6 py-4">
                     <p class="text-sm font-semibold">${t.subject}</p>
                     <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
                 </td>
-                <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span></td>
-                <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span></td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span>
+                </td>
+                <td class="px-6 py-4">${adjuntoCell}</td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         ${deleteBtn}
@@ -298,24 +423,34 @@
             }).join('');
         }
 
+        // ── Vista previa de imagen ──────────────────────────────────────────────────
+        function openPreview(url) {
+            document.getElementById('preview-img').src = url;
+            document.getElementById('modal-preview').classList.remove('hidden');
+        }
+        document.getElementById('preview-close').onclick = () => {
+            document.getElementById('modal-preview').classList.add('hidden');
+            document.getElementById('preview-img').src = '';
+        };
+        document.getElementById('modal-preview').addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+                document.getElementById('preview-img').src = '';
+            }
+        });
+
+        // ── Carga de tickets ────────────────────────────────────────────────────────
         async function loadTickets() {
             const isAdmin = window.SYP_IS_ADMIN;
-
             if (isAdmin) {
-                // Admin: carga todos del servidor
                 try {
                     const data = await authFetch(`${API}/tickets`).then(r => r.json());
                     allTickets = Array.isArray(data) ? data : [];
                     renderTickets(allTickets);
                 } catch (e) { console.warn('Backend no disponible.'); }
             } else {
-                // Default: solo muestra los IDs guardados en sessionStorage
                 const sessionIds = getSessionTicketIds();
-                if (!sessionIds.length) {
-                    renderTickets([]);
-                    return;
-                }
-                // Filtra del array en memoria si ya los tenemos
+                if (!sessionIds.length) { renderTickets([]); return; }
                 const sessionTickets = allTickets.filter(t => sessionIds.includes(t.id));
                 renderTickets(sessionTickets.length ? sessionTickets : []);
             }
@@ -328,7 +463,7 @@
             loadTickets();
         }
 
-        // Buscador (admin)
+        // ── Buscador ────────────────────────────────────────────────────────────────
         document.getElementById('search-tickets').addEventListener('input', function () {
             if (!window.SYP_IS_ADMIN) return;
             const q = this.value.toLowerCase();
@@ -339,7 +474,7 @@
             ));
         });
 
-        // Modal
+        // ── Modal nuevo ticket ──────────────────────────────────────────────────────
         const modal = document.getElementById('modal-ticket');
         document.getElementById('btn-nuevo-ticket').onclick = () => {
             document.querySelector('#form-ticket [name="date"]').value = new Date().toISOString().split('T')[0];
@@ -355,11 +490,8 @@
                 const res = await authFetch(`${API}/tickets`, { method: 'POST', body: fd });
                 if (!res.ok) throw new Error('Error al crear ticket');
                 const newTicket = await res.json();
-
-                // Guardar ID en sesión para usuario default
                 addSessionTicketId(newTicket.id);
                 allTickets.unshift(newTicket);
-
                 modal.classList.add('hidden');
                 e.target.reset();
                 loadTickets();
@@ -369,18 +501,11 @@
             }
         };
 
-        // Inicializar cuando el rol esté disponible
+        // ── Init ────────────────────────────────────────────────────────────────────
         window.addEventListener('syp:auth', () => {
-            const isAdmin = window.SYP_IS_ADMIN;
-
-            // Mostrar aviso de modo invitado
-            if (!isAdmin) {
-                document.getElementById('guest-notice').classList.remove('hidden');
-            }
-
+            if (!window.SYP_IS_ADMIN) document.getElementById('guest-notice').classList.remove('hidden');
             loadTickets();
         });
-
         if (window.SYP_ROLE !== undefined) {
             if (!window.SYP_IS_ADMIN) document.getElementById('guest-notice').classList.remove('hidden');
             loadTickets();
