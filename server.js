@@ -95,19 +95,27 @@ initDb().then(db => {
     app.post('/api/auth/login', async (req, res) => {
         try {
             const { username, password } = req.body;
-            if (!username || !password) {
+            if (!username || !password)
                 return res.status(400).json({ error: 'Usuario y contraseña requeridos.' });
-            }
-            if (username !== ADMIN_USERNAME) {
+            if (username !== ADMIN_USERNAME)
                 return res.status(401).json({ error: 'Credenciales incorrectas.' });
-            }
+
             const valid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
-            if (!valid) {
+            if (!valid)
                 return res.status(401).json({ error: 'Credenciales incorrectas.' });
-            }
+
             req.session.role = 'admin';
             req.session.username = ADMIN_USERNAME;
-            res.json({ role: 'admin', username: ADMIN_USERNAME });
+
+            // ← ESTO ES LO QUE FALTA
+            req.session.save((err) => {
+                if (err) {
+                    console.error('Error guardando sesión:', err);
+                    return res.status(500).json({ error: 'Error al guardar sesión.' });
+                }
+                res.json({ role: 'admin', username: ADMIN_USERNAME });
+            });
+
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Error en el servidor.' });
