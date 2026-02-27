@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
-<script src="auth-guard.js" data-page="ahorros"></script>
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Ahorros – S&P Gestión</title>
+    <!-- auth-guard PRIMERO, antes de tailwind y chart.js -->
+    <script src="auth-guard.js" data-page="ahorros"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap"
@@ -2137,8 +2138,14 @@
         document.getElementById('arc-proyectado-26').addEventListener('mouseleave', () => { document.getElementById('radial-tooltip-26').style.opacity = '0'; });
 
         /* ══ INIT ══ */
-        loadAhorros();
-        loadProcesosForSelect();
+        // authFetch() la provee auth-guard.js — esperar a que resuelva el JWT
+        function initPage() {
+            loadAhorros();
+            loadProcesosForSelect();
+        }
+        window.addEventListener('syp:auth', initPage);
+        // Fallback: si syp:auth ya disparó antes de registrar el listener
+        if (window.SYP_ROLE !== undefined) initPage();
     </script>
 </body>
 
