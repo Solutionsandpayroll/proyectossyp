@@ -34,7 +34,7 @@ const allowedOrigins = [
     'https://proyectossyp.onrender.com'
 ];
 app.use(cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -51,13 +51,12 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS en Render
+        secure: true,      // ← antes era condicional, ahora siempre true
         httpOnly: true,
-        maxAge: 8 * 60 * 60 * 1000, // 8 horas
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        maxAge: 8 * 60 * 60 * 1000,
+        sameSite: 'none'   // ← antes era condicional, ahora siempre none
     }
 }));
-
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
