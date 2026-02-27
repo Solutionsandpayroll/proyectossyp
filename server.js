@@ -7,7 +7,7 @@ const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const streamifier = require('streamifier'); // convierte buffer a stream para Cloudinary
 const initDb = require('./db/init');
 require('dotenv').config();
 
@@ -50,23 +50,33 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// ── Multer → Cloudinary Storage ────────────────────────────────────────────────
-// Los archivos van directo a Cloudinary, NO al disco de Render
-const cloudStorage = new CloudinaryStorage({
-    cloudinary,
-    params: async (req, file) => ({
-        folder: 'syp-tickets',           // carpeta en tu Cloudinary
-        resource_type: 'auto',                  // detecta imagen/pdf/video/etc
-        public_id: `ticket-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-        // Para PDFs y docs: forzar descarga en lugar de vista en browser
-        type: 'upload',
-    }),
-});
-
+// ── Multer en memoria → luego subimos manualmente a Cloudinary ────────────────
+// Usamos memoryStorage para no tocar el disco de Render
 const upload = multer({
-    storage: cloudStorage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 },  // 10 MB máximo
 });
+
+// Helper: sube un buffer a Cloudinary y devuelve la URL segura
+function uploadToCloudinary(buffer, mimetype) {
+    return new Promise((resolve, reject) => {
+        const resourceType = mimetype.startsWith('image/') ? 'image'
+            : mimetype === 'application/pdf' ? 'raw'
+                : 'raw';
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'syp-tickets',
+                resource_type: resourceType,
+                public_id: `ticket-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+            },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result.secure_url);
+            }
+        );
+        streamifier.createReadStream(buffer).pipe(uploadStream);
+    });
+}
 
 // ── Middleware JWT ─────────────────────────────────────────────────────────────
 function getToken(req) {
@@ -270,9 +280,11 @@ initDb().then(async db => {
             if (!date || !subject || !description)
                 return res.status(400).json({ error: 'date, subject y description requeridos' });
 
-            // req.file.path  → URL segura de Cloudinary (https://res.cloudinary.com/...)
-            // req.file.filename → public_id en Cloudinary
-            const attachmentUrl = req.file ? req.file.path : null;
+            // Subir buffer a Cloudinary y obtener URL permanente
+            let attachmentUrl = null;
+            if (req.file) {
+                attachmentUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+            }
 
             const id = await db.runAndSave(
                 'INSERT INTO tickets (date,subject,description,priority,attachment) VALUES ($1,$2,$3,$4,$5)',
