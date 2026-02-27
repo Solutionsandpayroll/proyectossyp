@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 
 <head>
@@ -11,17 +10,12 @@
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
-    <script id="tailwind-config">
+    <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#102a47",
-                        "accent": "#e51148",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#13191f",
-                    },
+                    colors: { "primary": "#102a47", "accent": "#e51148", "background-light": "#f6f7f8", "background-dark": "#13191f" },
                     fontFamily: { "display": ["Outfit", "sans-serif"] },
                     borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                 },
@@ -50,61 +44,80 @@
             border-radius: 10px;
         }
     </style>
+    <!-- Guard: accesible a todos, adapta funciones según rol -->
+    <script src="auth-guard.js" data-page="tickets"></script>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
+
+        <!-- ═══ SIDEBAR ═══ -->
         <aside class="w-64 bg-primary flex flex-col h-full border-r border-primary/10">
             <div class="px-5 py-4 flex items-center justify-start border-b border-white/10">
-                <img src="logo.png" alt="Solutions &amp; Payroll" class="h-14 w-auto object-contain" />
+                <img src="logo.png" alt="Solutions & Payroll" class="h-14 w-auto object-contain" />
             </div>
             <nav class="flex-1 px-4 space-y-1 mt-4">
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                     href="index.html">
                     <span class="material-symbols-outlined text-xl">dashboard</span>
                     <span class="text-sm font-medium">Inicio</span>
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                <a data-admin-only
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                     href="proyectos.html">
                     <span class="material-symbols-outlined text-xl">sync_alt</span>
                     <span class="text-sm font-medium">Procesos</span>
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors group"
+                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors"
                     href="tickets.html">
                     <span class="material-symbols-outlined text-xl">confirmation_number</span>
                     <span class="text-sm font-medium">Tickets</span>
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
+                <a data-admin-only
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                     href="ahorros.html">
                     <span class="material-symbols-outlined text-xl">savings</span>
                     <span class="text-sm font-medium">Ahorros</span>
                 </a>
             </nav>
-            <div class="px-4 py-6 mt-auto border-t border-white/10">
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors group"
-                    href="#">
-                    <span class="material-symbols-outlined text-xl">settings</span>
-                    <span class="text-sm font-medium">Configuración</span>
+            <div class="px-4 py-6 mt-auto border-t border-white/10 space-y-1">
+                <div class="px-3 py-1.5 flex items-center gap-2">
+                    <span class="text-xs text-white/40 font-medium">Sesión:</span>
+                    <span id="role-badge"
+                        class="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/10 text-white/60">Invitado</span>
+                </div>
+                <a id="btn-configuracion" href="login.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-xl">manage_accounts</span>
+                    <span class="text-sm font-medium">Iniciar Sesión</span>
                 </a>
             </div>
         </aside>
-        <!-- Contenido principal -->
+
+        <!-- ═══ CONTENIDO PRINCIPAL ═══ -->
         <main class="flex-1 flex flex-col overflow-hidden">
-            <!-- Encabezado -->
             <header
                 class="py-6 px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between z-10 shrink-0 sticky top-0">
-                <h2 class="text-2xl font-black text-primary dark:text-slate-100 tracking-tight">Gestión de Tickets</h2>
+                <div>
+                    <h2 class="text-2xl font-black text-primary dark:text-slate-100 tracking-tight">Gestión de Tickets
+                    </h2>
+                    <!-- Aviso de modo invitado -->
+                    <p id="guest-notice"
+                        class="hidden text-xs text-amber-600 font-semibold mt-0.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">info</span>
+                        Solo se muestran los tickets creados en esta sesión
+                    </p>
+                </div>
                 <button id="btn-nuevo-ticket"
                     class="flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-lg text-sm font-bold shadow-lg shadow-accent/20 hover:bg-accent/90 transition-all active:scale-95">
                     <span class="material-symbols-outlined text-lg">add_circle</span>
                     Nuevo Ticket
                 </button>
             </header>
-            <!-- Contenido con scroll -->
+
             <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <!-- Barra de búsqueda propia de Tickets -->
+                    <!-- Buscador (solo admin lo necesita realmente) -->
                     <div class="relative">
                         <span
                             class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
@@ -113,7 +126,7 @@
                             placeholder="Buscar tickets por asunto, prioridad o estatus..." type="text" />
                     </div>
 
-                    <!-- Tabla de Tickets -->
+                    <!-- Tabla -->
                     <div
                         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
@@ -146,12 +159,19 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Hint para invitado si no tiene tickets -->
+                    <div id="guest-empty-hint" class="hidden text-center py-4">
+                        <p class="text-sm text-slate-400">¿Necesitas reportar un problema?</p>
+                        <p class="text-xs text-slate-400 mt-1">Crea un ticket con el botón <strong
+                                class="text-accent">Nuevo Ticket</strong>.</p>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modal: Nuevo Ticket -->
+    <!-- ═══ MODAL: NUEVO TICKET ═══ -->
     <div id="modal-ticket" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
         <div
             class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto">
@@ -211,7 +231,18 @@
     </div>
 
     <script>
-        const API = 'https://proyectossyp.onrender.com/api';;
+        const API = 'https://proyectossyp.onrender.com/api';
+
+        // IDs de tickets creados en esta sesión (para usuario default)
+        const SESSION_KEY = 'syp_session_ticket_ids';
+        function getSessionTicketIds() {
+            try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]'); } catch { return []; }
+        }
+        function addSessionTicketId(id) {
+            const ids = getSessionTicketIds();
+            ids.push(id);
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(ids));
+        }
 
         const priorityColor = {
             'Baja': 'bg-slate-100 text-slate-600',
@@ -229,83 +260,131 @@
         let allTickets = [];
 
         function renderTickets(data) {
+            const isAdmin = window.SYP_IS_ADMIN;
             const tbody = document.getElementById('tbody-tickets');
+
             if (!data.length) {
                 tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 text-sm">
-                    <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
-                    No hay tickets registrados aún.</td></tr>`;
+                <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
+                No hay tickets registrados aún.</td></tr>`;
+                if (!isAdmin) document.getElementById('guest-empty-hint').classList.remove('hidden');
                 return;
             }
+            document.getElementById('guest-empty-hint').classList.add('hidden');
+
             tbody.innerHTML = data.map(t => {
                 const pc = priorityColor[t.priority] || 'bg-slate-100 text-slate-600';
                 const sc = statusColor[t.status] || 'bg-slate-50 text-slate-500';
+                // Botón eliminar solo para admin
+                const deleteBtn = isAdmin
+                    ? `<button onclick="deleteTicket(${t.id})" class="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                       <span class="material-symbols-outlined text-xl">delete</span>
+                   </button>`
+                    : '';
                 return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
-                    <td class="px-6 py-4 text-sm text-slate-500">${t.date || '—'}</td>
-                    <td class="px-6 py-4">
-                        <p class="text-sm font-semibold">${t.subject}</p>
-                        <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="deleteTicket(${t.id})"
-                                class="p-2 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
-                                <span class="material-symbols-outlined text-xl">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
+                <td class="px-6 py-4 text-sm text-slate-500">${t.date || '—'}</td>
+                <td class="px-6 py-4">
+                    <p class="text-sm font-semibold">${t.subject}</p>
+                    <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
+                </td>
+                <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span></td>
+                <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span></td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        ${deleteBtn}
+                    </div>
+                </td>
+            </tr>`;
             }).join('');
         }
 
         async function loadTickets() {
-            try {
-                const data = await fetch(`${API}/tickets`).then(r => r.json());
-                allTickets = data;
-                renderTickets(data);
-            } catch (e) {
-                console.warn('Backend no disponible.');
+            const isAdmin = window.SYP_IS_ADMIN;
+
+            if (isAdmin) {
+                // Admin: carga todos del servidor
+                try {
+                    const data = await fetch(`${API}/tickets`, { credentials: 'include' }).then(r => r.json());
+                    allTickets = Array.isArray(data) ? data : [];
+                    renderTickets(allTickets);
+                } catch (e) { console.warn('Backend no disponible.'); }
+            } else {
+                // Default: solo muestra los IDs guardados en sessionStorage
+                const sessionIds = getSessionTicketIds();
+                if (!sessionIds.length) {
+                    renderTickets([]);
+                    return;
+                }
+                // Filtra del array en memoria si ya los tenemos
+                const sessionTickets = allTickets.filter(t => sessionIds.includes(t.id));
+                renderTickets(sessionTickets.length ? sessionTickets : []);
             }
         }
 
         async function deleteTicket(id) {
             if (!confirm('¿Eliminar este ticket?')) return;
-            await fetch(`${API}/tickets/${id}`, { method: 'DELETE' });
+            await fetch(`${API}/tickets/${id}`, { method: 'DELETE', credentials: 'include' });
+            allTickets = allTickets.filter(t => t.id !== id);
             loadTickets();
         }
 
-        // Búsqueda
+        // Buscador (admin)
         document.getElementById('search-tickets').addEventListener('input', function () {
+            if (!window.SYP_IS_ADMIN) return;
             const q = this.value.toLowerCase();
-            const filtered = allTickets.filter(t =>
+            renderTickets(allTickets.filter(t =>
                 (t.subject || '').toLowerCase().includes(q) ||
                 (t.priority || '').toLowerCase().includes(q) ||
                 (t.status || '').toLowerCase().includes(q)
-            );
-            renderTickets(filtered);
+            ));
         });
 
         // Modal
         const modal = document.getElementById('modal-ticket');
-        document.getElementById('btn-nuevo-ticket').onclick = () => modal.classList.remove('hidden');
+        document.getElementById('btn-nuevo-ticket').onclick = () => {
+            document.querySelector('#form-ticket [name="date"]').value = new Date().toISOString().split('T')[0];
+            modal.classList.remove('hidden');
+        };
         document.getElementById('modal-close').onclick = () => modal.classList.add('hidden');
         document.getElementById('modal-cancel').onclick = () => modal.classList.add('hidden');
 
         document.getElementById('form-ticket').onsubmit = async (e) => {
             e.preventDefault();
             const fd = new FormData(e.target);
-            await fetch(`${API}/tickets`, { method: 'POST', body: fd });
-            modal.classList.add('hidden');
-            e.target.reset();
-            loadTickets();
+            try {
+                const res = await fetch(`${API}/tickets`, { method: 'POST', body: fd });
+                if (!res.ok) throw new Error('Error al crear ticket');
+                const newTicket = await res.json();
+
+                // Guardar ID en sesión para usuario default
+                addSessionTicketId(newTicket.id);
+                allTickets.unshift(newTicket);
+
+                modal.classList.add('hidden');
+                e.target.reset();
+                loadTickets();
+            } catch (err) {
+                alert('Error al crear el ticket. Verifica la conexión.');
+                console.error(err);
+            }
         };
 
-        loadTickets();
+        // Inicializar cuando el rol esté disponible
+        window.addEventListener('syp:auth', () => {
+            const isAdmin = window.SYP_IS_ADMIN;
+
+            // Mostrar aviso de modo invitado
+            if (!isAdmin) {
+                document.getElementById('guest-notice').classList.remove('hidden');
+            }
+
+            loadTickets();
+        });
+
+        if (window.SYP_ROLE !== undefined) {
+            if (!window.SYP_IS_ADMIN) document.getElementById('guest-notice').classList.remove('hidden');
+            loadTickets();
+        }
     </script>
 </body>
 

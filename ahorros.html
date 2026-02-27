@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<script src="auth-guard.js" data-page="ahorros"></script>
 
 <head>
     <meta charset="utf-8" />
@@ -621,7 +622,8 @@
                     <span class="material-symbols-outlined text-xl">dashboard</span>
                     <span class="text-sm font-medium">Inicio</span>
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                <a data-admin-only
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                     href="proyectos.html">
                     <span class="material-symbols-outlined text-xl">sync_alt</span>
                     <span class="text-sm font-medium">Procesos</span>
@@ -631,17 +633,23 @@
                     <span class="material-symbols-outlined text-xl">confirmation_number</span>
                     <span class="text-sm font-medium">Tickets</span>
                 </a>
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors"
+                <a data-admin-only
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/10 text-white transition-colors"
                     href="ahorros.html">
                     <span class="material-symbols-outlined text-xl">savings</span>
                     <span class="text-sm font-medium">Ahorros</span>
                 </a>
             </nav>
-            <div class="px-4 py-6 mt-auto border-t border-white/10">
-                <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
-                    href="#">
-                    <span class="material-symbols-outlined text-xl">settings</span>
-                    <span class="text-sm font-medium">Configuración</span>
+            <div class="px-4 py-6 mt-auto border-t border-white/10 space-y-1">
+                <div class="px-3 py-1.5 flex items-center gap-2">
+                    <span class="text-xs text-white/40 font-medium">Sesión:</span>
+                    <span id="role-badge"
+                        class="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/10 text-white/60">Admin</span>
+                </div>
+                <a id="btn-configuracion" href="login.html"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-xl">logout</span>
+                    <span class="text-sm font-medium">Cerrar Sesión</span>
                 </a>
             </div>
         </aside>
@@ -1631,21 +1639,21 @@
 
         async function loadAhorros() {
             try {
-                const data = await fetch(`${API}/ahorros`).then(r => r.json());
+                const data = await fetch(`${API}/ahorros`,{ credentials: 'include' }).then(r => r.json());
                 allAhorros = Array.isArray(data) ? data : [];
                 renderAhorros(allAhorros);
             } catch (e) { console.warn('Backend no disponible.'); }
         }
         async function deleteAhorro(id) {
             if (!confirm('¿Eliminar este registro de ahorro?')) return;
-            await fetch(`${API}/ahorros/${id}`, { method: 'DELETE' });
+            await fetch(`${API}/ahorros/${id}`, { method: 'DELETE', credentials: 'include' });
             loadAhorros();
         }
 
         /* ══ SELECT PROCESOS ══ */
         async function loadProcesosForSelect() {
             try {
-                const procesos = await fetch(`${API}/proyectos`).then(r => r.json());
+                const procesos = await fetch(`${API}/proyectos`,{ credentials: 'include' }).then(r => r.json());
                 allProcesosList = procesos;
                 const select = document.getElementById('ahorro-project-select');
                 const fin = procesos.filter(p => p.status === 'Finalizado');
@@ -1681,7 +1689,7 @@
             body.tiempo_gestion_antes = parseFloat(body.tiempo_gestion_antes) || 0;
             body.tiempo_gestion_actual = parseFloat(body.tiempo_gestion_actual) || 0;
             body.total_antes = parseFloat(body.total_antes) || 0; body.total_actual = parseFloat(body.total_actual) || 0;
-            await fetch(`${API}/ahorros`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            await fetch(`${API}/ahorros`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
             modal.classList.add('hidden'); e.target.reset();
             ['costo_mensual_display', 'ahorro-encargado', 'total_antes_display', 'total_actual_display', 'costo_hora_display', 'ahorro_total_display']
                 .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -2031,8 +2039,8 @@
             async function loadActivities() {
                 try {
                     const [ahorros, proyectos] = await Promise.all([
-                        fetch(`${API}/ahorros`).then(r => r.json()),
-                        fetch(`${API}/proyectos`).then(r => r.json()),
+                        fetch(`${API}/ahorros`, { credentials: 'include' }).then(r => r.json()),
+                        fetch(`${API}/proyectos`, { credentials: 'include' }).then(r => r.json()),
                     ]);
                     const map = {};
                     (proyectos || []).forEach(p => { map[p.id] = p; });

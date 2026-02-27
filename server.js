@@ -4,6 +4,8 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 const initDb = require('./db/init');
 require('dotenv').config();
 
@@ -16,13 +18,46 @@ ticketEvents.on('new_ticket', notifyNewTicket);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Contraseña admin (hash de "Admin2025*") ──────────────────────────────────
+// Para cambiarla: node -e "const b=require('bcryptjs'); b.hash('TuNuevaPass',10).then(h=>console.log(h))"
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync('admin123*', 10);
+const ADMIN_USERNAME = 'admin';
+
 // ─── Carpeta de adjuntos ───────────────────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR);
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors());
+const allowedOrigins = [
+    'http://127.0.0.1:5500',
+    'http://localhost:5500',
+    'https://proyectossyp.onrender.com'
+];
+app.use(cors({
+    origin: function(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
+
+// ─── Sesiones ─────────────────────────────────────────────────────────────────
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'syp-secret-key-2025',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production', // HTTPS en Render
+        httpOnly: true,
+        maxAge: 8 * 60 * 60 * 1000, // 8 horas
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    }
+}));
+
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
@@ -36,14 +71,62 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
+// ─── Middlewares de autenticación ─────────────────────────────────────────────
+function requireAdmin(req, res, next) {
+    if (req.session && req.session.role === 'admin') return next();
+    res.status(401).json({ error: 'No autorizado. Se requiere rol admin.' });
+}
+
 // ─── Arranque asíncrono ────────────────────────────────────────────────────────
 initDb().then(db => {
 
     // ═══════════════════════════════════════════════════════════════════════════
-    //  PROYECTOS
+    //  AUTH
     // ═══════════════════════════════════════════════════════════════════════════
 
-    app.get('/api/proyectos', async (req, res) => {
+    // Verificar sesión actual
+    app.get('/api/auth/me', (req, res) => {
+        if (req.session && req.session.role === 'admin') {
+            return res.json({ role: 'admin', username: ADMIN_USERNAME });
+        }
+        res.json({ role: 'default' });
+    });
+
+    // Login
+    app.post('/api/auth/login', async (req, res) => {
+        try {
+            const { username, password } = req.body;
+            if (!username || !password) {
+                return res.status(400).json({ error: 'Usuario y contraseña requeridos.' });
+            }
+            if (username !== ADMIN_USERNAME) {
+                return res.status(401).json({ error: 'Credenciales incorrectas.' });
+            }
+            const valid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+            if (!valid) {
+                return res.status(401).json({ error: 'Credenciales incorrectas.' });
+            }
+            req.session.role = 'admin';
+            req.session.username = ADMIN_USERNAME;
+            res.json({ role: 'admin', username: ADMIN_USERNAME });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error en el servidor.' });
+        }
+    });
+
+    // Logout
+    app.post('/api/auth/logout', (req, res) => {
+        req.session.destroy(() => {
+            res.json({ ok: true });
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  PROYECTOS — solo admin
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    app.get('/api/proyectos', requireAdmin, async (req, res) => {
         try {
             const rows = await db.getAll(`
                 SELECT p.*, s.amount AS savings_amount, s.status AS savings_status
@@ -58,7 +141,7 @@ initDb().then(db => {
         }
     });
 
-    app.get('/api/proyectos/:id', async (req, res) => {
+    app.get('/api/proyectos/:id', requireAdmin, async (req, res) => {
         try {
             const row = await db.getRow('SELECT * FROM projects WHERE id = $1', [req.params.id]);
             if (!row) return res.status(404).json({ error: 'Proyecto no encontrado' });
@@ -69,7 +152,7 @@ initDb().then(db => {
         }
     });
 
-    app.post('/api/proyectos', async (req, res) => {
+    app.post('/api/proyectos', requireAdmin, async (req, res) => {
         try {
             const { area, encargado, leader, name, status = 'En Progreso', progress = 0 } = req.body;
             if (!area || !encargado || !leader || !name) {
@@ -87,7 +170,7 @@ initDb().then(db => {
         }
     });
 
-    app.put('/api/proyectos/:id', async (req, res) => {
+    app.put('/api/proyectos/:id', requireAdmin, async (req, res) => {
         try {
             const existing = await db.getRow('SELECT * FROM projects WHERE id = $1', [req.params.id]);
             if (!existing) return res.status(404).json({ error: 'Proyecto no encontrado' });
@@ -112,7 +195,7 @@ initDb().then(db => {
         }
     });
 
-    app.delete('/api/proyectos/:id', async (req, res) => {
+    app.delete('/api/proyectos/:id', requireAdmin, async (req, res) => {
         try {
             const existing = await db.getRow('SELECT id FROM projects WHERE id = $1', [req.params.id]);
             if (!existing) return res.status(404).json({ error: 'Proyecto no encontrado' });
@@ -125,10 +208,10 @@ initDb().then(db => {
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    //  AVANCES
+    //  AVANCES — solo admin
     // ═══════════════════════════════════════════════════════════════════════════
 
-    app.get('/api/proyectos/:id/avances', async (req, res) => {
+    app.get('/api/proyectos/:id/avances', requireAdmin, async (req, res) => {
         try {
             const project = await db.getRow('SELECT id FROM projects WHERE id = $1', [req.params.id]);
             if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
@@ -143,7 +226,7 @@ initDb().then(db => {
         }
     });
 
-    app.post('/api/proyectos/:id/avances', async (req, res) => {
+    app.post('/api/proyectos/:id/avances', requireAdmin, async (req, res) => {
         try {
             const { description, date, progress = 0 } = req.body;
             if (!description || !date) {
@@ -171,7 +254,7 @@ initDb().then(db => {
         }
     });
 
-    app.delete('/api/avances/:id', async (req, res) => {
+    app.delete('/api/avances/:id', requireAdmin, async (req, res) => {
         try {
             const existing = await db.getRow('SELECT * FROM advances WHERE id = $1', [req.params.id]);
             if (!existing) return res.status(404).json({ error: 'Avance no encontrado' });
@@ -194,10 +277,11 @@ initDb().then(db => {
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    //  TICKETS
+    //  TICKETS — crear: público | listar/editar/eliminar: admin
     // ═══════════════════════════════════════════════════════════════════════════
 
-    app.get('/api/tickets', async (req, res) => {
+    // GET todos los tickets → solo admin
+    app.get('/api/tickets', requireAdmin, async (req, res) => {
         try {
             const rows = await db.getAll('SELECT * FROM tickets ORDER BY created_at DESC');
             res.json(rows);
@@ -207,6 +291,7 @@ initDb().then(db => {
         }
     });
 
+    // POST crear ticket → público (default + admin)
     app.post('/api/tickets', upload.single('attachment'), async (req, res) => {
         try {
             const { date, subject, description, priority = 'Media' } = req.body;
@@ -227,7 +312,7 @@ initDb().then(db => {
         }
     });
 
-    app.put('/api/tickets/:id', async (req, res) => {
+    app.put('/api/tickets/:id', requireAdmin, async (req, res) => {
         try {
             const existing = await db.getRow('SELECT * FROM tickets WHERE id = $1', [req.params.id]);
             if (!existing) return res.status(404).json({ error: 'Ticket no encontrado' });
@@ -251,7 +336,7 @@ initDb().then(db => {
         }
     });
 
-    app.delete('/api/tickets/:id', async (req, res) => {
+    app.delete('/api/tickets/:id', requireAdmin, async (req, res) => {
         try {
             const ticket = await db.getRow('SELECT attachment FROM tickets WHERE id = $1', [req.params.id]);
             if (!ticket) return res.status(404).json({ error: 'Ticket no encontrado' });
@@ -268,10 +353,10 @@ initDb().then(db => {
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    //  AHORROS
+    //  AHORROS — solo admin
     // ═══════════════════════════════════════════════════════════════════════════
 
-    app.get('/api/ahorros', async (req, res) => {
+    app.get('/api/ahorros', requireAdmin, async (req, res) => {
         try {
             const rows = await db.getAll(`
                 SELECT s.*, p.name AS project_name, p.area AS project_area, p.encargado AS project_encargado
@@ -286,12 +371,8 @@ initDb().then(db => {
         }
     });
 
-    app.post('/api/ahorros', async (req, res) => {
+    app.post('/api/ahorros', requireAdmin, async (req, res) => {
         try {
-            console.log('Body recibido:', req.body);
-            console.log('project_id:', req.body.project_id);
-            console.log('amount:', req.body.amount);
-            console.log('date:', req.body.date);
             const {
                 project_id, amount, status = 'Proyectado', date,
                 costo_mensual = 0, costo_hora = 0,
@@ -328,7 +409,7 @@ initDb().then(db => {
             const created = await db.getRow('SELECT * FROM savings WHERE id = $1', [id]);
             res.status(201).json(created);
         } catch (err) {
-            if (err.code === '23505') { // unique violation en PostgreSQL
+            if (err.code === '23505') {
                 return res.status(409).json({ error: 'Este proyecto ya tiene un ahorro. Use PUT para actualizarlo.' });
             }
             console.error(err);
@@ -336,7 +417,7 @@ initDb().then(db => {
         }
     });
 
-    app.put('/api/ahorros/:id', async (req, res) => {
+    app.put('/api/ahorros/:id', requireAdmin, async (req, res) => {
         try {
             const existing = await db.getRow('SELECT * FROM savings WHERE id = $1', [req.params.id]);
             if (!existing) return res.status(404).json({ error: 'Ahorro no encontrado' });
@@ -382,7 +463,7 @@ initDb().then(db => {
         }
     });
 
-    app.delete('/api/ahorros/:id', async (req, res) => {
+    app.delete('/api/ahorros/:id', requireAdmin, async (req, res) => {
         try {
             const existing = await db.getRow('SELECT id FROM savings WHERE id = $1', [req.params.id]);
             if (!existing) return res.status(404).json({ error: 'Ahorro no encontrado' });
@@ -395,10 +476,10 @@ initDb().then(db => {
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
-    //  DASHBOARD
+    //  DASHBOARD — solo admin
     // ═══════════════════════════════════════════════════════════════════════════
 
-    app.get('/api/dashboard', async (req, res) => {
+    app.get('/api/dashboard', requireAdmin, async (req, res) => {
         try {
             const { c: totalProyectos } = await db.getRow('SELECT COUNT(*) as c FROM projects') || { c: 0 };
             const { c: ticketsAbiertos } = await db.getRow("SELECT COUNT(*) as c FROM tickets WHERE status='Abierto'") || { c: 0 };
