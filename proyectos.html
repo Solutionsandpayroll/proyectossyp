@@ -425,7 +425,7 @@
         async function loadProcesos() {
             showLoadingState();
             try {
-                const res = await fetch(`${API}/proyectos`, { credentials: 'include' });
+                const res = await authFetch(`${API}/proyectos`, { credentials: 'include' });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 allProcesos = Array.isArray(data) ? data : [];
@@ -447,7 +447,7 @@
             if (!proceso) return;
             const body = { ...proceso, status: nuevoEstado };
             try {
-                const res = await fetch(`${API}/proyectos/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                const res = await authFetch(`${API}/proyectos/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
                 if (!res.ok) throw new Error('Error en backend');
                 proceso.status = nuevoEstado;
                 const select = document.querySelector(`select[data-proceso-id="${id}"]`);
@@ -462,7 +462,7 @@
         async function deleteProceso(id) {
             if (!confirm('¿Estás seguro de que deseas eliminar este proceso?')) return;
             try {
-                const res = await fetch(`${API}/proyectos/${id}`, { method: 'DELETE', credentials: 'include' });
+                const res = await authFetch(`${API}/proyectos/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (!res.ok) throw new Error('Error al eliminar');
                 openAdvancesRows.delete(id);
                 await loadProcesos();

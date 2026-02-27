@@ -1639,21 +1639,21 @@
 
         async function loadAhorros() {
             try {
-                const data = await fetch(`${API}/ahorros`,{ credentials: 'include' }).then(r => r.json());
+                const data = await authFetch(`${API}/ahorros`).then(r => r.json());
                 allAhorros = Array.isArray(data) ? data : [];
                 renderAhorros(allAhorros);
             } catch (e) { console.warn('Backend no disponible.'); }
         }
         async function deleteAhorro(id) {
             if (!confirm('¿Eliminar este registro de ahorro?')) return;
-            await fetch(`${API}/ahorros/${id}`, { method: 'DELETE', credentials: 'include' });
+            await authFetch(`${API}/ahorros/${id}`, { method: 'DELETE' });
             loadAhorros();
         }
 
         /* ══ SELECT PROCESOS ══ */
         async function loadProcesosForSelect() {
             try {
-                const procesos = await fetch(`${API}/proyectos`,{ credentials: 'include' }).then(r => r.json());
+                const procesos = await authFetch(`${API}/proyectos`).then(r => r.json());
                 allProcesosList = procesos;
                 const select = document.getElementById('ahorro-project-select');
                 const fin = procesos.filter(p => p.status === 'Finalizado');
@@ -1689,7 +1689,7 @@
             body.tiempo_gestion_antes = parseFloat(body.tiempo_gestion_antes) || 0;
             body.tiempo_gestion_actual = parseFloat(body.tiempo_gestion_actual) || 0;
             body.total_antes = parseFloat(body.total_antes) || 0; body.total_actual = parseFloat(body.total_actual) || 0;
-            await fetch(`${API}/ahorros`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            await authFetch(`${API}/ahorros`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
             modal.classList.add('hidden'); e.target.reset();
             ['costo_mensual_display', 'ahorro-encargado', 'total_antes_display', 'total_actual_display', 'costo_hora_display', 'ahorro_total_display']
                 .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -2039,8 +2039,8 @@
             async function loadActivities() {
                 try {
                     const [ahorros, proyectos] = await Promise.all([
-                        fetch(`${API}/ahorros`, { credentials: 'include' }).then(r => r.json()),
-                        fetch(`${API}/proyectos`, { credentials: 'include' }).then(r => r.json()),
+                        authFetch(`${API}/ahorros`).then(r => r.json()),
+                        authFetch(`${API}/proyectos`).then(r => r.json()),
                     ]);
                     const map = {};
                     (proyectos || []).forEach(p => { map[p.id] = p; });

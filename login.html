@@ -14,10 +14,7 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#102a47",
-                        "accent": "#e51148",
-                    },
+                    colors: { "primary": "#102a47", "accent": "#e51148" },
                     fontFamily: { "display": ["Outfit", "sans-serif"] },
                 },
             },
@@ -32,7 +29,6 @@
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Fondo animado con la paleta del sistema */
         .bg-pattern {
             background-color: #102a47;
             background-image:
@@ -41,7 +37,6 @@
                 radial-gradient(ellipse at 60% 80%, rgba(229, 17, 72, 0.08) 0%, transparent 50%);
         }
 
-        /* Grid decorativo */
         .grid-lines {
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
@@ -49,13 +44,12 @@
             background-size: 48px 48px;
         }
 
-        /* Partículas flotantes */
         @keyframes float-a {
 
             0%,
             100% {
                 transform: translateY(0px) rotate(0deg);
-                opacity: 0.6;
+                opacity: .6;
             }
 
             50% {
@@ -69,12 +63,12 @@
             0%,
             100% {
                 transform: translateY(0px) rotate(45deg);
-                opacity: 0.4;
+                opacity: .4;
             }
 
             50% {
                 transform: translateY(18px) rotate(225deg);
-                opacity: 0.8;
+                opacity: .8;
             }
         }
 
@@ -83,12 +77,12 @@
             0%,
             100% {
                 transform: translateY(0px) scale(1);
-                opacity: 0.3;
+                opacity: .3;
             }
 
             50% {
                 transform: translateY(-14px) scale(1.2);
-                opacity: 0.7;
+                opacity: .7;
             }
         }
 
@@ -104,7 +98,6 @@
             animation: float-c 6s ease-in-out infinite 2s;
         }
 
-        /* Card de login */
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -121,9 +114,8 @@
             animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* Input focus ring personalizado */
         .syp-input {
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color .2s, box-shadow .2s;
         }
 
         .syp-input:focus {
@@ -132,10 +124,9 @@
             outline: none;
         }
 
-        /* Botón submit */
         .btn-login {
             background: linear-gradient(135deg, #e51148 0%, #c20e3e 100%);
-            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+            transition: transform .15s, box-shadow .15s, filter .15s;
         }
 
         .btn-login:hover {
@@ -145,10 +136,9 @@
         }
 
         .btn-login:active {
-            transform: translateY(0px);
+            transform: translateY(0);
         }
 
-        /* Shake en error */
         @keyframes shake {
 
             0%,
@@ -182,10 +172,9 @@
         }
 
         .shake {
-            animation: shake 0.5s ease;
+            animation: shake .5s ease;
         }
 
-        /* Spinner */
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -193,7 +182,7 @@
         }
 
         .spinner {
-            animation: spin 0.7s linear infinite;
+            animation: spin .7s linear infinite;
         }
 
         .material-symbols-outlined {
@@ -216,7 +205,6 @@
     <!-- Card principal -->
     <div class="login-card w-full max-w-md">
 
-        <!-- Logo + encabezado -->
         <div class="text-center mb-8">
             <img src="logo.png" alt="S&P Gestión" class="h-16 w-auto object-contain mx-auto mb-5 drop-shadow-lg"
                 onerror="this.style.display='none'" />
@@ -224,7 +212,6 @@
             <p class="text-white/50 text-sm mt-1 font-medium">Solo personal autorizado</p>
         </div>
 
-        <!-- Card de formulario -->
         <div class="bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl shadow-black/40"
             id="login-card-inner">
 
@@ -237,32 +224,23 @@
 
             <form id="login-form" class="space-y-5" autocomplete="off">
 
-                <!-- Usuario -->
                 <div>
-                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">
-                        Usuario
-                    </label>
+                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Usuario</label>
                     <div class="relative">
                         <span
-                            class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">
-                            person
-                        </span>
+                            class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">person</span>
                         <input id="username" name="username" type="text" required autocomplete="username"
                             placeholder="admin"
                             class="syp-input w-full pl-11 pr-4 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
                     </div>
                 </div>
 
-                <!-- Contraseña -->
                 <div>
-                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">
-                        Contraseña
-                    </label>
+                    <label
+                        class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Contraseña</label>
                     <div class="relative">
                         <span
-                            class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">
-                            lock
-                        </span>
+                            class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">lock</span>
                         <input id="password" name="password" type="password" required autocomplete="current-password"
                             placeholder="••••••••••"
                             class="syp-input w-full pl-11 pr-12 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
@@ -273,17 +251,14 @@
                     </div>
                 </div>
 
-                <!-- Submit -->
                 <button type="submit" id="btn-submit"
                     class="btn-login w-full py-3.5 rounded-xl text-white font-black text-sm tracking-wide flex items-center justify-center gap-2 mt-2">
                     <span class="material-symbols-outlined text-xl" id="btn-icon">login</span>
                     <span id="btn-text">Ingresar al sistema</span>
                 </button>
-
             </form>
 
-            <!-- Divisor -->
-            <div class="mt-6 pt-5 border-t border-white/8 flex items-center justify-center">
+            <div class="mt-6 pt-5 border-t border-white/[0.08] flex items-center justify-center">
                 <a href="index.html"
                     class="flex items-center gap-1.5 text-xs font-semibold text-white/35 hover:text-white/60 transition-colors">
                     <span class="material-symbols-outlined text-base">arrow_back</span>
@@ -292,7 +267,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <p class="text-center text-white/20 text-xs mt-6 font-medium tracking-wide">
             S&P Gestión · Sistema de Control Operativo
         </p>
@@ -300,84 +274,87 @@
 
     <script>
         const API = 'https://proyectossyp.onrender.com/api';
+        const TOKEN_KEY = 'syp_token';
 
-        // Redirigir si ya es admin
-        fetch(`${API}/auth/me`, { credentials: 'include' })
-            .then(r => r.json())
-            .then(data => {
+        // Si ya tenemos token válido → redirigir directo
+        (async () => {
+            const token = localStorage.getItem(TOKEN_KEY);
+            if (!token) return;
+            try {
+                const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
                 if (data.role === 'admin') {
-                    const params = new URLSearchParams(window.location.search);
-                    const from = params.get('from');
+                    const from = new URLSearchParams(window.location.search).get('from');
                     window.location.replace(from && from !== '/login.html' ? from : 'index.html');
                 }
-            })
-            .catch(() => { });
+            } catch { /* sin conexión, dejar que el usuario intente */ }
+        })();
 
         // Toggle contraseña
-        const passInput = document.getElementById('password');
-        const eyeIcon = document.getElementById('eye-icon');
         document.getElementById('toggle-pass').addEventListener('click', () => {
-            const isPass = passInput.type === 'password';
-            passInput.type = isPass ? 'text' : 'password';
-            eyeIcon.textContent = isPass ? 'visibility_off' : 'visibility';
+            const inp = document.getElementById('password');
+            const ico = document.getElementById('eye-icon');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            ico.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
         });
 
         // Submit
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const btn = document.getElementById('btn-submit');
             const btnIcon = document.getElementById('btn-icon');
             const btnText = document.getElementById('btn-text');
-            const errorBanner = document.getElementById('error-banner');
-            const errorMsg = document.getElementById('error-msg');
+            const errBnr = document.getElementById('error-banner');
+            const errMsg = document.getElementById('error-msg');
 
             // Estado cargando
             btn.disabled = true;
             btnIcon.classList.add('spinner');
             btnText.textContent = 'Verificando...';
-            errorBanner.classList.add('hidden');
+            errBnr.classList.add('hidden');
 
             const username = document.getElementById('username').value.trim();
-            const password = passInput.value;
+            const password = document.getElementById('password').value;
 
             try {
                 const res = await fetch(`${API}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ username, password })
+                    // ← Sin credentials:include · Sin cookies
+                    body: JSON.stringify({ username, password }),
                 });
                 const data = await res.json();
 
-                if (!res.ok) {
-                    throw new Error(data.error || 'Credenciales incorrectas.');
-                }
+                if (!res.ok) throw new Error(data.error || 'Credenciales incorrectas.');
 
-                // Éxito → redirigir
+                // ✅ Guardar token en localStorage
+                localStorage.setItem(TOKEN_KEY, data.token);
+
+                // Feedback visual éxito
                 btnIcon.classList.remove('spinner');
                 btnIcon.textContent = 'check_circle';
                 btnText.textContent = '¡Acceso concedido!';
-                btn.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+                btn.style.background = 'linear-gradient(135deg,#059669 0%,#047857 100%)';
 
                 setTimeout(() => {
-                    const params = new URLSearchParams(window.location.search);
-                    const from = params.get('from');
+                    const from = new URLSearchParams(window.location.search).get('from');
                     window.location.replace(from && from !== '/login.html' ? from : 'index.html');
                 }, 700);
 
             } catch (err) {
-                // Error → shake + mensaje
                 btn.disabled = false;
+                btn.style.background = '';
                 btnIcon.classList.remove('spinner');
                 btnIcon.textContent = 'login';
                 btnText.textContent = 'Ingresar al sistema';
-                btn.style.background = '';
 
-                errorMsg.textContent = err.message;
-                errorBanner.classList.remove('hidden');
+                errMsg.textContent = err.message;
+                errBnr.classList.remove('hidden');
 
-                document.getElementById('login-card-inner').classList.add('shake');
-                setTimeout(() => document.getElementById('login-card-inner').classList.remove('shake'), 500);
+                const card = document.getElementById('login-card-inner');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 500);
             }
         });
     </script>

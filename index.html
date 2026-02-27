@@ -201,7 +201,7 @@
             document.getElementById('header-role').textContent = 'Administrador';
             document.getElementById('header-username').textContent = 'S&P Admin';
             try {
-                const data = await fetch(`${API}/dashboard`, { credentials: 'include' }).then(r => r.json());
+                const data = await authFetch(`${API}/dashboard`).then(r => r.json());
                 document.querySelector('[data-kpi="proyectos"]').textContent = data.totalProyectos;
                 document.querySelector('[data-kpi="tickets"]').textContent = data.ticketsAbiertos;
                 document.querySelector('[data-kpi="urgentes"]').textContent = data.ticketsCriticos;

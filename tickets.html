@@ -304,7 +304,7 @@
             if (isAdmin) {
                 // Admin: carga todos del servidor
                 try {
-                    const data = await fetch(`${API}/tickets`, { credentials: 'include' }).then(r => r.json());
+                    const data = await authFetch(`${API}/tickets`).then(r => r.json());
                     allTickets = Array.isArray(data) ? data : [];
                     renderTickets(allTickets);
                 } catch (e) { console.warn('Backend no disponible.'); }
@@ -323,7 +323,7 @@
 
         async function deleteTicket(id) {
             if (!confirm('¿Eliminar este ticket?')) return;
-            await fetch(`${API}/tickets/${id}`, { method: 'DELETE', credentials: 'include' });
+            await authFetch(`${API}/tickets/${id}`, { method: 'DELETE' });
             allTickets = allTickets.filter(t => t.id !== id);
             loadTickets();
         }
@@ -352,7 +352,7 @@
             e.preventDefault();
             const fd = new FormData(e.target);
             try {
-                const res = await fetch(`${API}/tickets`, { method: 'POST', body: fd });
+                const res = await authFetch(`${API}/tickets`, { method: 'POST', body: fd });
                 if (!res.ok) throw new Error('Error al crear ticket');
                 const newTicket = await res.json();
 
