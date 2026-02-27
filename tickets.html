@@ -276,7 +276,9 @@
 
     <script>
         const API = 'https://proyectossyp.onrender.com/api';
-        const BASE_URL = 'https://proyectossyp.onrender.com';  // base para construir URLs de adjuntos
+        // attachment ahora es una URL completa de Cloudinary (https://res.cloudinary.com/...)
+        // Si por compatibilidad viene una ruta relativa antigua, construimos la URL de Render
+        const BASE_URL = 'https://proyectossyp.onrender.com';
 
         const SESSION_KEY = 'syp_session_ticket_ids';
         function getSessionTicketIds() {
@@ -316,11 +318,16 @@
         // ── Nombre corto para mostrar en la celda ───────────────────────────────────
         function shortName(path) {
             if (!path) return '';
-            // El path es tipo "uploads/1234567-miarchivo.pdf" → devolver "miarchivo.pdf"
-            const filename = path.split('/').pop();
-            // Quitar el prefijo timestamp-random-
+            // Cloudinary URL: ...syp-tickets/ticket-1234567-890.jpg → "ticket-1234567-890.jpg"
+            // Ruta legacy:    uploads/1234567-890-archivo.pdf       → "archivo.pdf"
+            const filename = path.split('/').pop().split('?')[0]; // quitar query params
+            if (path.startsWith('http')) {
+                // URL Cloudinary: el public_id es el nombre sin extensión
+                return filename.length > 24 ? filename.slice(0, 21) + '...' : filename;
+            }
+            // Legacy: quitar prefijo timestamp-random-
             const clean = filename.replace(/^\d+-\d+-/, '');
-            return clean.length > 22 ? clean.slice(0, 19) + '...' : clean;
+            return clean.length > 24 ? clean.slice(0, 21) + '...' : clean;
         }
 
         // ── Detecta si el adjunto es una imagen ─────────────────────────────────────
@@ -353,7 +360,11 @@
                 let adjuntoCell = `<span class="text-slate-300 text-xs italic">Sin adjunto</span>`;
 
                 if (t.attachment) {
-                    const fileUrl = `${BASE_URL}/${t.attachment}`;
+                    // Si ya es una URL completa (Cloudinary) → usarla directo
+                    // Si es ruta relativa (legacy) → construir URL de Render
+                    const fileUrl = t.attachment.startsWith('http')
+                        ? t.attachment
+                        : `${BASE_URL}/${t.attachment}`;
                     const icon = fileIcon(t.attachment);
                     const name = shortName(t.attachment);
                     const imgPreview = isImage(t.attachment)

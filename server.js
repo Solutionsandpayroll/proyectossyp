@@ -1,5 +1,4 @@
-// server.js — S&P Gestión · Auth con JWT en Authorization header
-// Sin cookies → compatible 100% con Cloudflare / Render
+// server.js — S&P Gestión · Auth JWT + Cloudinary para adjuntos
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -7,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const initDb = require('./db/init');
 require('dotenv').config();
 
@@ -22,6 +23,13 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'syp-jwt-fallback-secret-2025';
 const JWT_EXPIRES = '8h';
 
+// ── Cloudinary ─────────────────────────────────────────────────────────────────
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 // ── CORS ───────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
     'http://127.0.0.1:5500',
@@ -31,8 +39,6 @@ const allowedOrigins = [
     'https://proyectossyp.onrender.com',
 ];
 app.use(cors({
-    // null origin = archivo abierto desde file:// (desarrollo local sin servidor web)
-    // Sin cookies ni credentials → JWT en Authorization header
     origin: function (origin, cb) {
         if (!origin || origin === 'null' || allowedOrigins.includes(origin)) {
             return cb(null, true);
@@ -42,22 +48,27 @@ app.use(cors({
     credentials: false,
 }));
 app.use(express.json());
-
-// ── Carpeta uploads ────────────────────────────────────────────────────────────
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR);
 app.use(express.static(__dirname));
-app.use('/uploads', express.static(UPLOADS_DIR));
 
-// ── Multer ─────────────────────────────────────────────────────────────────────
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
-    filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e6)}-${file.originalname}`),
+// ── Multer → Cloudinary Storage ────────────────────────────────────────────────
+// Los archivos van directo a Cloudinary, NO al disco de Render
+const cloudStorage = new CloudinaryStorage({
+    cloudinary,
+    params: async (req, file) => ({
+        folder: 'syp-tickets',           // carpeta en tu Cloudinary
+        resource_type: 'auto',                  // detecta imagen/pdf/video/etc
+        public_id: `ticket-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+        // Para PDFs y docs: forzar descarga en lugar de vista en browser
+        type: 'upload',
+    }),
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+
+const upload = multer({
+    storage: cloudStorage,
+    limits: { fileSize: 10 * 1024 * 1024 },  // 10 MB máximo
+});
 
 // ── Middleware JWT ─────────────────────────────────────────────────────────────
-// Lee el token del header:  Authorization: Bearer <token>
 function getToken(req) {
     const auth = req.headers['authorization'] || '';
     return auth.startsWith('Bearer ') ? auth.slice(7) : null;
@@ -90,22 +101,19 @@ initDb().then(async db => {
         )
     `);
 
-    // ── Seed de usuarios: usa UPSERT para garantizar hash correcto siempre ──────
-    // Si el usuario ya existe, actualiza el hash (evita problemas de deploys anteriores)
+    // UPSERT admin y default — garantiza hash correcto en cada deploy
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'Admin2025*';
     const adminHash = await bcrypt.hash(ADMIN_PASS, 10);
     const defaultHash = await bcrypt.hash('no-login-default', 10);
 
     await db.run(`
-        INSERT INTO users (username, password, role)
-        VALUES ('admin', $1, 'admin')
+        INSERT INTO users (username, password, role) VALUES ('admin', $1, 'admin')
         ON CONFLICT (username) DO UPDATE SET password = $1, role = 'admin'
     `, [adminHash]);
-    console.log('✅ Usuario admin listo (contraseña sincronizada)');
+    console.log('✅ Usuario admin listo');
 
     await db.run(`
-        INSERT INTO users (username, password, role)
-        VALUES ('default', $1, 'default')
+        INSERT INTO users (username, password, role) VALUES ('default', $1, 'default')
         ON CONFLICT (username) DO UPDATE SET password = $1, role = 'default'
     `, [defaultHash]);
     console.log('✅ Usuario default listo');
@@ -114,7 +122,6 @@ initDb().then(async db => {
     //  AUTH
     // ═══════════════════════════════════════════════════════════════════════════
 
-    // GET /api/auth/me  — el cliente envía su token; si no tiene → role default
     app.get('/api/auth/me', (req, res) => {
         const token = getToken(req);
         if (!token) return res.json({ role: 'default' });
@@ -126,19 +133,15 @@ initDb().then(async db => {
         }
     });
 
-    // POST /api/auth/login  — devuelve un JWT
     app.post('/api/auth/login', async (req, res) => {
         try {
             const { username, password } = req.body || {};
             if (!username || !password)
                 return res.status(400).json({ error: 'Usuario y contraseña requeridos.' });
-
             const user = await db.getRow("SELECT * FROM users WHERE username=$1", [username]);
             if (!user) return res.status(401).json({ error: 'Credenciales incorrectas.' });
-
             const ok = await bcrypt.compare(password, user.password);
             if (!ok) return res.status(401).json({ error: 'Credenciales incorrectas.' });
-
             const token = jwt.sign(
                 { id: user.id, username: user.username, role: user.role },
                 JWT_SECRET,
@@ -151,7 +154,6 @@ initDb().then(async db => {
         }
     });
 
-    // POST /api/auth/logout  — solo informativo; el cliente borra el token
     app.post('/api/auth/logout', (_req, res) => res.json({ ok: true }));
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -195,7 +197,8 @@ initDb().then(async db => {
             const { area, encargado, leader, name, status, progress } = req.body;
             await db.run(
                 'UPDATE projects SET area=$1,encargado=$2,leader=$3,name=$4,status=$5,progress=$6 WHERE id=$7',
-                [area ?? ex.area, encargado ?? ex.encargado, leader ?? ex.leader, name ?? ex.name, status ?? ex.status, progress ?? ex.progress, req.params.id]);
+                [area ?? ex.area, encargado ?? ex.encargado, leader ?? ex.leader, name ?? ex.name,
+                status ?? ex.status, progress ?? ex.progress, req.params.id]);
             res.json(await db.getRow('SELECT * FROM projects WHERE id=$1', [req.params.id]));
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al actualizar proyecto' }); }
     });
@@ -242,7 +245,8 @@ initDb().then(async db => {
             if (!ex) return res.status(404).json({ error: 'Avance no encontrado' });
             await db.run('DELETE FROM advances WHERE id=$1', [req.params.id]);
             const latest = await db.getRow(
-                'SELECT progress FROM advances WHERE project_id=$1 ORDER BY date DESC,id DESC LIMIT 1', [ex.project_id]);
+                'SELECT progress FROM advances WHERE project_id=$1 ORDER BY date DESC,id DESC LIMIT 1',
+                [ex.project_id]);
             await db.run('UPDATE projects SET progress=$1 WHERE id=$2', [latest?.progress ?? 0, ex.project_id]);
             res.json({ message: 'Avance eliminado' });
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al eliminar avance' }); }
@@ -250,6 +254,7 @@ initDb().then(async db => {
 
     // ═══════════════════════════════════════════════════════════════════════════
     //  TICKETS — crear: público | resto: admin
+    //  attachment: ahora guarda la URL de Cloudinary (permanente)
     // ═══════════════════════════════════════════════════════════════════════════
 
     app.get('/api/tickets', requireAdmin, async (req, res) => {
@@ -258,19 +263,28 @@ initDb().then(async db => {
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al obtener tickets' }); }
     });
 
+    // POST /api/tickets — público, sube adjunto a Cloudinary
     app.post('/api/tickets', upload.single('attachment'), async (req, res) => {
         try {
             const { date, subject, description, priority = 'Media' } = req.body;
             if (!date || !subject || !description)
                 return res.status(400).json({ error: 'date, subject y description requeridos' });
-            const attachment = req.file ? `uploads/${req.file.filename}` : null;
+
+            // req.file.path  → URL segura de Cloudinary (https://res.cloudinary.com/...)
+            // req.file.filename → public_id en Cloudinary
+            const attachmentUrl = req.file ? req.file.path : null;
+
             const id = await db.runAndSave(
                 'INSERT INTO tickets (date,subject,description,priority,attachment) VALUES ($1,$2,$3,$4,$5)',
-                [date, subject, description, priority, attachment]);
+                [date, subject, description, priority, attachmentUrl]);
+
             const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [id]);
             ticketEvents.emit('new_ticket', ticket);
             res.status(201).json(ticket);
-        } catch (err) { console.error(err); res.status(500).json({ error: 'Error al crear ticket' }); }
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error al crear ticket' });
+        }
     });
 
     app.put('/api/tickets/:id', requireAdmin, async (req, res) => {
@@ -280,19 +294,37 @@ initDb().then(async db => {
             const { date, subject, description, priority, status } = req.body;
             await db.run(
                 'UPDATE tickets SET date=$1,subject=$2,description=$3,priority=$4,status=$5 WHERE id=$6',
-                [date ?? ex.date, subject ?? ex.subject, description ?? ex.description, priority ?? ex.priority, status ?? ex.status, req.params.id]);
+                [date ?? ex.date, subject ?? ex.subject, description ?? ex.description,
+                priority ?? ex.priority, status ?? ex.status, req.params.id]);
             res.json(await db.getRow('SELECT * FROM tickets WHERE id=$1', [req.params.id]));
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al actualizar ticket' }); }
     });
 
+    // DELETE ticket → también elimina el archivo de Cloudinary
     app.delete('/api/tickets/:id', requireAdmin, async (req, res) => {
         try {
-            const ticket = await db.getRow('SELECT attachment FROM tickets WHERE id=$1', [req.params.id]);
+            const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [req.params.id]);
             if (!ticket) return res.status(404).json({ error: 'Ticket no encontrado' });
+
+            // Eliminar de Cloudinary si existe
             if (ticket.attachment) {
-                const fp = path.join(__dirname, ticket.attachment);
-                if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                try {
+                    // Extraer public_id de la URL de Cloudinary
+                    // URL formato: https://res.cloudinary.com/<cloud>/image/upload/v.../syp-tickets/ticket-xxx
+                    const urlParts = ticket.attachment.split('/');
+                    const uploadIdx = urlParts.indexOf('upload');
+                    if (uploadIdx !== -1) {
+                        // Todo después de /upload/v123456/ es el public_id
+                        const afterUpload = urlParts.slice(uploadIdx + 2).join('/');
+                        const publicId = afterUpload.replace(/\.[^/.]+$/, ''); // quitar extensión
+                        await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
+                        console.log('🗑️  Cloudinary eliminado:', publicId);
+                    }
+                } catch (cloudErr) {
+                    console.warn('No se pudo eliminar de Cloudinary:', cloudErr.message);
+                }
             }
+
             await db.run('DELETE FROM tickets WHERE id=$1', [req.params.id]);
             res.json({ message: 'Ticket eliminado' });
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al eliminar ticket' }); }
@@ -352,9 +384,12 @@ initDb().then(async db => {
                     total_antes=$12,total_actual=$13 WHERE id=$14`,
                 [f.amount ?? ex.amount, f.status ?? ex.status, f.date ?? ex.date,
                 f.costo_mensual ?? ex.costo_mensual, f.costo_hora ?? ex.costo_hora,
-                f.tiempo_empleado_antes ?? ex.tiempo_empleado_antes, f.tiempo_empleado_actual ?? ex.tiempo_empleado_actual,
-                f.tiempo_gestion_antes ?? ex.tiempo_gestion_antes, f.tiempo_gestion_antes_tipo ?? ex.tiempo_gestion_antes_tipo,
-                f.tiempo_gestion_actual ?? ex.tiempo_gestion_actual, f.tiempo_gestion_actual_tipo ?? ex.tiempo_gestion_actual_tipo,
+                f.tiempo_empleado_antes ?? ex.tiempo_empleado_antes,
+                f.tiempo_empleado_actual ?? ex.tiempo_empleado_actual,
+                f.tiempo_gestion_antes ?? ex.tiempo_gestion_antes,
+                f.tiempo_gestion_antes_tipo ?? ex.tiempo_gestion_antes_tipo,
+                f.tiempo_gestion_actual ?? ex.tiempo_gestion_actual,
+                f.tiempo_gestion_actual_tipo ?? ex.tiempo_gestion_actual_tipo,
                 f.total_antes ?? ex.total_antes, f.total_actual ?? ex.total_actual, req.params.id]);
             res.json(await db.getRow('SELECT * FROM savings WHERE id=$1', [req.params.id]));
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al actualizar ahorro' }); }
@@ -383,9 +418,12 @@ initDb().then(async db => {
                 SELECT p.*, s.amount AS savings_amount FROM projects p
                 LEFT JOIN savings s ON s.project_id=p.id ORDER BY p.created_at DESC LIMIT 5`);
             res.json({ totalProyectos, ticketsAbiertos, ticketsCriticos, totalAhorros, recentProjects });
-        } catch (err) { console.error(err); res.status(500).json({ error: 'Error al obtener dashboard' }); }
+        } catch (err) { console.error(err); res.status(500).json({ error: 'Error dashboard' }); }
     });
 
-    app.listen(PORT, () => console.log(`🚀 Servidor SyP en puerto ${PORT} — Auth: JWT (sin cookies)`));
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor SyP en puerto ${PORT}`);
+        console.log(`   Auth: JWT | Storage: Cloudinary`);
+    });
 
 }).catch(err => { console.error('❌ Error BD:', err); process.exit(1); });
