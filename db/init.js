@@ -46,9 +46,15 @@ async function initDb() {
       priority    TEXT NOT NULL DEFAULT 'Media',
       attachment  TEXT,
       status      TEXT NOT NULL DEFAULT 'Abierto',
+      email       TEXT,
+      user_id     INTEGER,
       created_at  TIMESTAMP DEFAULT NOW()
     );
   `);
+
+  // Migraciones para tablas existentes (idempotentes)
+  await pool.query(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS email TEXT`);
+  await pool.query(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS user_id INTEGER`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS savings (

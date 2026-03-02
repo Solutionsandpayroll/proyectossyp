@@ -122,6 +122,13 @@
                     <span class="material-symbols-outlined text-xl">manage_accounts</span>
                     <span class="text-sm font-medium">Iniciar Sesión</span>
                 </a>
+                <!-- Solo visible cuando NO hay sesión activa -->
+                <a data-guest-only href="login.html"
+                    onclick="event.preventDefault(); window.location.href='login.html?modo=registro'"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/50 hover:bg-white/10 hover:text-white/80 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-xl">person_add</span>
+                    <span class="text-sm font-medium">Registrarse</span>
+                </a>
             </div>
         </aside>
 
@@ -168,6 +175,8 @@
                                         <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
                                             Asunto</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            Email</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
                                             Prioridad</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
                                             Estatus</th>
@@ -181,7 +190,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="tbody-tickets">
                                     <tr>
-                                        <td colspan="6" class="px-6 py-12 text-center text-slate-400 text-sm">
+                                        <td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
                                             <span
                                                 class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
                                             No hay tickets registrados aún.
@@ -226,10 +235,10 @@
                             class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Prioridad</label>
                         <select name="priority"
                             class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none">
-                            <option>Baja</option>
-                            <option selected>Media</option>
-                            <option>Alta</option>
-                            <option>Crítica</option>
+                            <option value="Baja">Baja</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Critica">Crítica</option>
                         </select>
                     </div>
                 </div>
@@ -243,6 +252,20 @@
                         class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Descripción</label>
                     <textarea name="description" rows="4" placeholder="Detalle completo del problema..."
                         class="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                        Email de contacto
+                    </label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">mail</span>
+                        <input id="ticket-email" name="email" type="email" placeholder="tu@email.com" autocomplete="email"
+                            class="w-full pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
+                    </div>
+                    <p id="ticket-email-hint" class="hidden mt-1 text-xs text-blue-500 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">info</span>
+                        Completado con tu cuenta
+                    </p>
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 block mb-1">Evidencia /
@@ -275,7 +298,9 @@
     </div>
 
     <script>
-        const API = 'https://proyectossyp.onrender.com/api';
+        const API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+            ? 'http://localhost:3000/api'
+            : 'https://proyectossyp.onrender.com/api';
         // attachment ahora es una URL completa de Cloudinary (https://res.cloudinary.com/...)
         // Si por compatibilidad viene una ruta relativa antigua, construimos la URL de Render
         const BASE_URL = 'https://proyectossyp.onrender.com';
@@ -344,7 +369,7 @@
             const tbody = document.getElementById('tbody-tickets');
 
             if (!data.length) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400 text-sm">
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center text-slate-400 text-sm">
             <span class="material-symbols-outlined text-4xl block mb-2 text-slate-300">confirmation_number</span>
             No hay tickets registrados aún.</td></tr>`;
                 if (!isAdmin) document.getElementById('guest-empty-hint').classList.remove('hidden');
@@ -418,6 +443,11 @@
                     <p class="text-sm font-semibold">${t.subject}</p>
                     <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
                 </td>
+                <td class="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
+                    ${t.email
+                        ? `<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-slate-400">mail</span>${t.email}</span>`
+                        : `<span class="text-slate-300 italic">Anónimo</span>`}
+                </td>
                 <td class="px-6 py-4">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span>
                 </td>
@@ -453,13 +483,17 @@
         // ── Carga de tickets ────────────────────────────────────────────────────────
         async function loadTickets() {
             const isAdmin = window.SYP_IS_ADMIN;
-            if (isAdmin) {
+            const isAuth = window.SYP_IS_AUTHENTICATED;   // autenticado (admin o default)
+
+            if (isAdmin || isAuth) {
+                // Admin: obtiene todos | Default autenticado: obtiene solo los suyos
                 try {
                     const data = await authFetch(`${API}/tickets`).then(r => r.json());
                     allTickets = Array.isArray(data) ? data : [];
                     renderTickets(allTickets);
                 } catch (e) { console.warn('Backend no disponible.'); }
             } else {
+                // Invitado anónimo: muestra solo los tickets creados en esta sesión
                 const sessionIds = getSessionTicketIds();
                 if (!sessionIds.length) { renderTickets([]); return; }
                 const sessionTickets = allTickets.filter(t => sessionIds.includes(t.id));
@@ -476,12 +510,13 @@
 
         // ── Buscador ────────────────────────────────────────────────────────────────
         document.getElementById('search-tickets').addEventListener('input', function () {
-            if (!window.SYP_IS_ADMIN) return;
+            if (!window.SYP_IS_ADMIN && !window.SYP_IS_AUTHENTICATED) return;
             const q = this.value.toLowerCase();
             renderTickets(allTickets.filter(t =>
                 (t.subject || '').toLowerCase().includes(q) ||
                 (t.priority || '').toLowerCase().includes(q) ||
-                (t.status || '').toLowerCase().includes(q)
+                (t.status || '').toLowerCase().includes(q) ||
+                (t.email || '').toLowerCase().includes(q)
             ));
         });
 
@@ -489,6 +524,21 @@
         const modal = document.getElementById('modal-ticket');
         document.getElementById('btn-nuevo-ticket').onclick = () => {
             document.querySelector('#form-ticket [name="date"]').value = new Date().toISOString().split('T')[0];
+            // Pre-llenar email si hay sesión activa
+            const emailInput = document.getElementById('ticket-email');
+            const emailHint  = document.getElementById('ticket-email-hint');
+            const userEmail  = window.SYP_EMAIL || null;
+            if (userEmail) {
+                emailInput.value = userEmail;
+                emailInput.readOnly = true;
+                emailInput.classList.add('bg-blue-50', 'dark:bg-slate-700', 'text-slate-500');
+                emailHint.classList.remove('hidden');
+            } else {
+                emailInput.value = '';
+                emailInput.readOnly = false;
+                emailInput.classList.remove('bg-blue-50', 'dark:bg-slate-700', 'text-slate-500');
+                emailHint.classList.add('hidden');
+            }
             modal.classList.remove('hidden');
         };
         document.getElementById('modal-close').onclick = () => modal.classList.add('hidden');
@@ -514,11 +564,35 @@
 
         // ── Init ────────────────────────────────────────────────────────────────────
         window.addEventListener('syp:auth', () => {
-            if (!window.SYP_IS_ADMIN) document.getElementById('guest-notice').classList.remove('hidden');
+            const isAdmin = window.SYP_IS_ADMIN;
+            const isAuth = window.SYP_IS_AUTHENTICATED;
+            const notice = document.getElementById('guest-notice');
+            if (!isAdmin && isAuth) {
+                // Usuario default autenticado: ve sus propios tickets desde el servidor
+                notice.innerHTML = `<span class="material-symbols-outlined text-sm">person</span>
+                    Mostrando tus tickets · <span class="font-bold">${window.SYP_EMAIL || window.SYP_USERNAME || ''}</span>`;
+                notice.classList.remove('hidden');
+            } else if (!isAdmin && !isAuth) {
+                // Invitado anónimo
+                notice.innerHTML = `<span class="material-symbols-outlined text-sm">info</span>
+                    Solo se muestran los tickets creados en esta sesión`;
+                notice.classList.remove('hidden');
+            }
             loadTickets();
         });
         if (window.SYP_ROLE !== undefined) {
-            if (!window.SYP_IS_ADMIN) document.getElementById('guest-notice').classList.remove('hidden');
+            const isAdmin = window.SYP_IS_ADMIN;
+            const isAuth = window.SYP_IS_AUTHENTICATED;
+            const notice = document.getElementById('guest-notice');
+            if (!isAdmin && isAuth) {
+                notice.innerHTML = `<span class="material-symbols-outlined text-sm">person</span>
+                    Mostrando tus tickets · <span class="font-bold">${window.SYP_EMAIL || window.SYP_USERNAME || ''}</span>`;
+                notice.classList.remove('hidden');
+            } else if (!isAdmin && !isAuth) {
+                notice.innerHTML = `<span class="material-symbols-outlined text-sm">info</span>
+                    Solo se muestran los tickets creados en esta sesión`;
+                notice.classList.remove('hidden');
+            }
             loadTickets();
         }
     </script>

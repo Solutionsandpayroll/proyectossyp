@@ -443,7 +443,7 @@
         async function loadProcesos() {
             showLoadingState();
             try {
-                const res = await authFetch(`${API}/proyectos`, { credentials: 'include' });
+                const res = await authFetch(`${API}/proyectos`, {});
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 allProcesos = Array.isArray(data) ? data : [];
@@ -465,7 +465,7 @@
             if (!proceso) return;
             const body = { ...proceso, status: nuevoEstado };
             try {
-                const res = await authFetch(`${API}/proyectos/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                const res = await authFetch(`${API}/proyectos/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 if (!res.ok) throw new Error('Error en backend');
                 proceso.status = nuevoEstado;
                 const select = document.querySelector(`select[data-proceso-id="${id}"]`);
@@ -480,7 +480,7 @@
         async function deleteProceso(id) {
             if (!confirm('¿Estás seguro de que deseas eliminar este proceso?')) return;
             try {
-                const res = await authFetch(`${API}/proyectos/${id}`, { method: 'DELETE', credentials: 'include' });
+                const res = await authFetch(`${API}/proyectos/${id}`, { method: 'DELETE' });
                 if (!res.ok) throw new Error('Error al eliminar');
                 openAdvancesRows.delete(id);
                 await loadProcesos();
@@ -521,10 +521,10 @@
             const editId = document.getElementById('edit-proceso-id').value;
             try {
                 if (editId) {
-                    const res = await authFetch(`${API}/proyectos/${editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                    const res = await authFetch(`${API}/proyectos/${editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                     if (!res.ok) throw new Error('Error al actualizar');
                 } else {
-                    const res = await authFetch(`${API}/proyectos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                    const res = await authFetch(`${API}/proyectos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                     if (!res.ok) throw new Error('Error al crear');
                 }
                 cerrarModalProceso();
@@ -550,7 +550,7 @@
             e.preventDefault();
             const fd = new FormData(e.target), projectId = fd.get('project_id'), body = Object.fromEntries(fd.entries());
             try {
-                const res = await authFetch(`${API}/proyectos/${projectId}/avances`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                const res = await authFetch(`${API}/proyectos/${projectId}/avances`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 if (!res.ok) throw new Error('Error al guardar avance');
                 cerrarModalAvances();
                 await loadProcesos();
@@ -580,7 +580,7 @@
             if (!list) return;
             list.innerHTML = `<div class="text-xs text-slate-400 flex items-center gap-2"><span class="material-symbols-outlined animate-spin text-sm">sync</span> Cargando...</div>`;
             try {
-                const res = await authFetch(`${API}/proyectos/${projectId}/avances`, { credentials: 'include' });
+                const res = await authFetch(`${API}/proyectos/${projectId}/avances`, {});
                 if (!res.ok) throw new Error('Error al obtener avances');
                 const data = await res.json();
                 if (!data.length) {
@@ -607,7 +607,7 @@
         async function deleteAvance(avanceId, projectId) {
             if (!confirm('¿Eliminar este avance?')) return;
             try {
-                await authFetch(`${API}/avances/${avanceId}`, { method: 'DELETE', credentials: 'include' });
+                await authFetch(`${API}/avances/${avanceId}`, { method: 'DELETE' });
                 await loadProcesos();
             } catch (e) { alert('Error al eliminar el avance.'); }
         }

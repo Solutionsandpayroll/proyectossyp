@@ -205,42 +205,44 @@
     <!-- Card principal -->
     <div class="login-card w-full max-w-md">
 
+        <!-- Título dinámico -->
         <div class="text-center mb-8">
             <img src="logo.png" alt="S&P Gestión" class="h-16 w-auto object-contain mx-auto mb-5 drop-shadow-lg"
                 onerror="this.style.display='none'" />
-            <h1 class="text-2xl font-black text-white tracking-tight">Acceso Administrativo</h1>
-            <p class="text-white/50 text-sm mt-1 font-medium">Solo personal autorizado</p>
+            <h1 id="card-title" class="text-2xl font-black text-white tracking-tight">Iniciar Sesión</h1>
+            <p id="card-subtitle" class="text-white/50 text-sm mt-1 font-medium">Accede con tu cuenta</p>
         </div>
 
         <div class="bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl shadow-black/40"
             id="login-card-inner">
 
-            <!-- Error banner -->
+            <!-- Banner de error / éxito -->
             <div id="error-banner"
                 class="hidden mb-5 flex items-center gap-2 bg-accent/15 border border-accent/30 text-accent rounded-xl px-4 py-3 text-sm font-semibold">
                 <span class="material-symbols-outlined text-lg flex-shrink-0">error</span>
-                <span id="error-msg">Credenciales incorrectas.</span>
+                <span id="error-msg">Error.</span>
+            </div>
+            <div id="success-banner"
+                class="hidden mb-5 flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-xl px-4 py-3 text-sm font-semibold">
+                <span class="material-symbols-outlined text-lg flex-shrink-0">check_circle</span>
+                <span id="success-msg">¡Cuenta creada!</span>
             </div>
 
+            <!-- ══════════ FORMULARIO LOGIN ══════════ -->
             <form id="login-form" class="space-y-5" autocomplete="off">
-
                 <div>
-                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Usuario</label>
+                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Usuario o Email</label>
                     <div class="relative">
-                        <span
-                            class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">person</span>
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">person</span>
                         <input id="username" name="username" type="text" required autocomplete="username"
-                            placeholder="admin"
+                            placeholder="tu@email.com"
                             class="syp-input w-full pl-11 pr-4 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
                     </div>
                 </div>
-
                 <div>
-                    <label
-                        class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Contraseña</label>
+                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Contraseña</label>
                     <div class="relative">
-                        <span
-                            class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">lock</span>
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">lock</span>
                         <input id="password" name="password" type="password" required autocomplete="current-password"
                             placeholder="••••••••••"
                             class="syp-input w-full pl-11 pr-12 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
@@ -250,7 +252,6 @@
                         </button>
                     </div>
                 </div>
-
                 <button type="submit" id="btn-submit"
                     class="btn-login w-full py-3.5 rounded-xl text-white font-black text-sm tracking-wide flex items-center justify-center gap-2 mt-2">
                     <span class="material-symbols-outlined text-xl" id="btn-icon">login</span>
@@ -258,9 +259,56 @@
                 </button>
             </form>
 
-            <div class="mt-6 pt-5 border-t border-white/[0.08] flex items-center justify-center">
-                <a href="index.html"
-                    class="flex items-center gap-1.5 text-xs font-semibold text-white/35 hover:text-white/60 transition-colors">
+            <!-- ══════════ FORMULARIO REGISTRO ══════════ -->
+            <form id="register-form" class="hidden space-y-5" autocomplete="off">
+                <div>
+                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Email</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">mail</span>
+                        <input id="reg-email" name="email" type="email" required autocomplete="email"
+                            placeholder="tu@email.com"
+                            class="syp-input w-full pl-11 pr-4 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Contraseña</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">lock</span>
+                        <input id="reg-password" name="password" type="password" required autocomplete="new-password"
+                            placeholder="Mínimo 6 caracteres"
+                            class="syp-input w-full pl-11 pr-12 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
+                        <button type="button" id="toggle-reg-pass"
+                            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+                            <span class="material-symbols-outlined text-xl" id="eye-icon-reg">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-white/60 uppercase tracking-widest mb-2">Confirmar Contraseña</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-xl pointer-events-none">lock_reset</span>
+                        <input id="reg-confirm" name="confirmPassword" type="password" required autocomplete="new-password"
+                            placeholder="Repite la contraseña"
+                            class="syp-input w-full pl-11 pr-4 py-3 bg-white/[0.07] border border-white/15 rounded-xl text-white placeholder-white/25 text-sm font-medium" />
+                    </div>
+                </div>
+                <button type="submit" id="btn-register"
+                    class="btn-login w-full py-3.5 rounded-xl text-white font-black text-sm tracking-wide flex items-center justify-center gap-2 mt-2">
+                    <span class="material-symbols-outlined text-xl" id="btn-reg-icon">person_add</span>
+                    <span id="btn-reg-text">Crear cuenta</span>
+                </button>
+            </form>
+
+            <!-- Pie de la tarjeta -->
+            <div class="mt-6 pt-5 border-t border-white/[0.08] flex flex-col items-center gap-3">
+                <!-- Toggle login ↔ registro -->
+                <button type="button" id="toggle-mode"
+                    class="text-xs font-semibold text-white/50 hover:text-white/80 transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-base" id="toggle-icon">person_add</span>
+                    <span id="toggle-text">¿Sin cuenta? Regístrate</span>
+                </button>
+                <a href="index.html" id="link-back"
+                    class="flex items-center gap-1.5 text-xs font-semibold text-white/30 hover:text-white/55 transition-colors">
                     <span class="material-symbols-outlined text-base">arrow_back</span>
                     Volver sin iniciar sesión
                 </a>
@@ -273,24 +321,83 @@
     </div>
 
     <script>
-        const API = 'https://proyectossyp.onrender.com/api';
+        // URL dinámica: local en dev, producción en Render
+        const API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+            ? 'http://localhost:3000/api'
+            : 'https://proyectossyp.onrender.com/api';
         const TOKEN_KEY = 'syp_token';
 
-        // Si ya tenemos token válido → redirigir directo
+        // ── Si ya hay sesión válida → redirigir ──────────────────────────────────
         (async () => {
             const token = localStorage.getItem(TOKEN_KEY);
             if (!token) return;
             try {
                 const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                if (data.role === 'admin') {
+                if (data.username) { // token válido para cualquier rol
                     const from = new URLSearchParams(window.location.search).get('from');
-                    window.location.replace(from && from !== '/login.html' ? from : 'index.html');
+                    const dest = data.role === 'admin'
+                        ? (from && from !== '/login.html' ? from : 'index.html')
+                        : 'tickets.html';
+                    window.location.replace(dest);
                 }
-            } catch { /* sin conexión, dejar que el usuario intente */ }
+            } catch { /* sin conexión */ }
         })();
 
-        // Toggle contraseña
+        // ── Helpers UI ────────────────────────────────────────────────────────────
+        let isRegisterMode = false;
+
+        function showError(msg) {
+            const b = document.getElementById('error-banner');
+            document.getElementById('error-msg').textContent = msg;
+            b.classList.remove('hidden');
+            document.getElementById('success-banner').classList.add('hidden');
+            document.getElementById('login-card-inner').classList.add('shake');
+            setTimeout(() => document.getElementById('login-card-inner').classList.remove('shake'), 500);
+        }
+
+        function showSuccess(msg) {
+            document.getElementById('error-banner').classList.add('hidden');
+            const b = document.getElementById('success-banner');
+            document.getElementById('success-msg').textContent = msg;
+            b.classList.remove('hidden');
+        }
+
+        function hideAlerts() {
+            document.getElementById('error-banner').classList.add('hidden');
+            document.getElementById('success-banner').classList.add('hidden');
+        }
+
+        // ── Toggle login ↔ registro ───────────────────────────────────────────────
+        document.getElementById('toggle-mode').addEventListener('click', () => {
+            isRegisterMode = !isRegisterMode;
+            hideAlerts();
+
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const title = document.getElementById('card-title');
+            const subtitle = document.getElementById('card-subtitle');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleIcon = document.getElementById('toggle-icon');
+
+            if (isRegisterMode) {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                title.textContent = 'Crear Cuenta';
+                subtitle.textContent = 'Regístrate con tu email';
+                toggleText.textContent = '¿Ya tienes cuenta? Inicia sesión';
+                toggleIcon.textContent = 'login';
+            } else {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                title.textContent = 'Iniciar Sesión';
+                subtitle.textContent = 'Accede con tu cuenta';
+                toggleText.textContent = '¿Sin cuenta? Regístrate';
+                toggleIcon.textContent = 'person_add';
+            }
+        });
+
+        // ── Toggle visibilidad contraseña (login) ────────────────────────────────
         document.getElementById('toggle-pass').addEventListener('click', () => {
             const inp = document.getElementById('password');
             const ico = document.getElementById('eye-icon');
@@ -298,21 +405,25 @@
             ico.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
         });
 
-        // Submit
+        // ── Toggle visibilidad contraseña (registro) ─────────────────────────────
+        document.getElementById('toggle-reg-pass').addEventListener('click', () => {
+            const inp = document.getElementById('reg-password');
+            const ico = document.getElementById('eye-icon-reg');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            ico.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
+        });
+
+        // ── Submit LOGIN ──────────────────────────────────────────────────────────
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const btn = document.getElementById('btn-submit');
             const btnIcon = document.getElementById('btn-icon');
             const btnText = document.getElementById('btn-text');
-            const errBnr = document.getElementById('error-banner');
-            const errMsg = document.getElementById('error-msg');
 
-            // Estado cargando
             btn.disabled = true;
             btnIcon.classList.add('spinner');
             btnText.textContent = 'Verificando...';
-            errBnr.classList.add('hidden');
+            hideAlerts();
 
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
@@ -321,17 +432,13 @@
                 const res = await fetch(`${API}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // ← Sin credentials:include · Sin cookies
                     body: JSON.stringify({ username, password }),
                 });
                 const data = await res.json();
-
                 if (!res.ok) throw new Error(data.error || 'Credenciales incorrectas.');
 
-                // ✅ Guardar token en localStorage
                 localStorage.setItem(TOKEN_KEY, data.token);
 
-                // Feedback visual éxito
                 btnIcon.classList.remove('spinner');
                 btnIcon.textContent = 'check_circle';
                 btnText.textContent = '¡Acceso concedido!';
@@ -339,7 +446,10 @@
 
                 setTimeout(() => {
                     const from = new URLSearchParams(window.location.search).get('from');
-                    window.location.replace(from && from !== '/login.html' ? from : 'index.html');
+                    const dest = data.role === 'admin'
+                        ? (from && from !== '/login.html' ? from : 'index.html')
+                        : 'tickets.html';
+                    window.location.replace(dest);
                 }, 700);
 
             } catch (err) {
@@ -348,15 +458,64 @@
                 btnIcon.classList.remove('spinner');
                 btnIcon.textContent = 'login';
                 btnText.textContent = 'Ingresar al sistema';
-
-                errMsg.textContent = err.message;
-                errBnr.classList.remove('hidden');
-
-                const card = document.getElementById('login-card-inner');
-                card.classList.add('shake');
-                setTimeout(() => card.classList.remove('shake'), 500);
+                showError(err.message);
             }
         });
+
+        // ── Submit REGISTRO ───────────────────────────────────────────────────────
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-register');
+            const btnIcon = document.getElementById('btn-reg-icon');
+            const btnText = document.getElementById('btn-reg-text');
+
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm').value;
+
+            if (password !== confirmPassword) {
+                showError('Las contraseñas no coinciden.');
+                return;
+            }
+
+            btn.disabled = true;
+            btnIcon.classList.add('spinner');
+            btnText.textContent = 'Creando cuenta...';
+            hideAlerts();
+
+            try {
+                const res = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, confirmPassword }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Error al registrar.');
+
+                localStorage.setItem(TOKEN_KEY, data.token);
+
+                btnIcon.classList.remove('spinner');
+                btnIcon.textContent = 'check_circle';
+                btnText.textContent = '¡Cuenta creada!';
+                btn.style.background = 'linear-gradient(135deg,#059669 0%,#047857 100%)';
+
+                setTimeout(() => window.location.replace('tickets.html'), 800);
+
+            } catch (err) {
+                btn.disabled = false;
+                btn.style.background = '';
+                btnIcon.classList.remove('spinner');
+                btnIcon.textContent = 'person_add';
+                btnText.textContent = 'Crear cuenta';
+                showError(err.message);
+            }
+        });
+
+        // ── Abrir directamente en modo registro si viene ?modo=registro ──────────
+        // Debe ejecutarse DESPUÉS de que el listener del toggle está registrado
+        if (new URLSearchParams(window.location.search).get('modo') === 'registro') {
+            document.getElementById('toggle-mode').click();
+        }
     </script>
 </body>
 

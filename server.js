@@ -97,6 +97,28 @@ function requireAdmin(req, res, next) {
     }
 }
 
+// Requiere cualquier usuario autenticado (admin o default)
+function requireAuth(req, res, next) {
+    const token = getToken(req);
+    if (!token) return res.status(401).json({ error: 'Token requerido.' });
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.user = payload;
+        next();
+    } catch {
+        res.status(401).json({ error: 'Token inválido o expirado.' });
+    }
+}
+
+// Lee token si existe, pero no lo exige (para endpoints semi-públicos)
+function optionalAuth(req, res, next) {
+    const token = getToken(req);
+    if (token) {
+        try { req.user = jwt.verify(token, JWT_SECRET); } catch { /* ignorar */ }
+    }
+    next();
+}
+
 // ── Arranque ───────────────────────────────────────────────────────────────────
 initDb().then(async db => {
 
@@ -105,28 +127,29 @@ initDb().then(async db => {
         CREATE TABLE IF NOT EXISTS users (
             id         SERIAL PRIMARY KEY,
             username   VARCHAR(50)  NOT NULL UNIQUE,
+            email      TEXT         UNIQUE,
             password   TEXT         NOT NULL,
             role       VARCHAR(20)  NOT NULL DEFAULT 'default',
             created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
         )
     `);
 
-    // UPSERT admin y default — garantiza hash correcto en cada deploy
+    // Migraciones idempotentes para columnas nuevas
+    await db.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`);
+    try {
+        await db.run(`ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email)`);
+    } catch { /* restricción ya existe */ }
+    await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS user_id INTEGER`);
+
+    // UPSERT admin — garantiza hash correcto en cada deploy
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'Admin2025*';
     const adminHash = await bcrypt.hash(ADMIN_PASS, 10);
-    const defaultHash = await bcrypt.hash('no-login-default', 10);
 
     await db.run(`
         INSERT INTO users (username, password, role) VALUES ('admin', $1, 'admin')
         ON CONFLICT (username) DO UPDATE SET password = $1, role = 'admin'
     `, [adminHash]);
     console.log('✅ Usuario admin listo');
-
-    await db.run(`
-        INSERT INTO users (username, password, role) VALUES ('default', $1, 'default')
-        ON CONFLICT (username) DO UPDATE SET password = $1, role = 'default'
-    `, [defaultHash]);
-    console.log('✅ Usuario default listo');
 
     // ═══════════════════════════════════════════════════════════════════════════
     //  AUTH
@@ -137,7 +160,7 @@ initDb().then(async db => {
         if (!token) return res.json({ role: 'default' });
         try {
             const payload = jwt.verify(token, JWT_SECRET);
-            res.json({ role: payload.role, username: payload.username });
+            res.json({ role: payload.role, username: payload.username, email: payload.email || null, id: payload.id });
         } catch {
             res.json({ role: 'default' });
         }
@@ -148,19 +171,59 @@ initDb().then(async db => {
             const { username, password } = req.body || {};
             if (!username || !password)
                 return res.status(400).json({ error: 'Usuario y contraseña requeridos.' });
-            const user = await db.getRow("SELECT * FROM users WHERE username=$1", [username]);
+            // Permite login con username o con email
+            const user = await db.getRow(
+                "SELECT * FROM users WHERE username=$1 OR email=$1",
+                [username]
+            );
             if (!user) return res.status(401).json({ error: 'Credenciales incorrectas.' });
             const ok = await bcrypt.compare(password, user.password);
             if (!ok) return res.status(401).json({ error: 'Credenciales incorrectas.' });
             const token = jwt.sign(
-                { id: user.id, username: user.username, role: user.role },
+                { id: user.id, username: user.username, email: user.email || null, role: user.role },
                 JWT_SECRET,
                 { expiresIn: JWT_EXPIRES }
             );
-            res.json({ token, role: user.role, username: user.username });
+            res.json({ token, role: user.role, username: user.username, email: user.email || null });
         } catch (err) {
             console.error(err);
             res.status(500).json({ error: 'Error en el servidor.' });
+        }
+    });
+
+    // ── REGISTRO — público
+    app.post('/api/auth/register', async (req, res) => {
+        try {
+            const { email, password, confirmPassword } = req.body || {};
+            if (!email || !password || !confirmPassword)
+                return res.status(400).json({ error: 'Email, contraseña y confirmación son requeridos.' });
+            if (password !== confirmPassword)
+                return res.status(400).json({ error: 'Las contraseñas no coinciden.' });
+            if (password.length < 6)
+                return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email))
+                return res.status(400).json({ error: 'Email no válido.' });
+
+            // Verificar si el email ya está registrado
+            const existing = await db.getRow('SELECT id FROM users WHERE email=$1 OR username=$1', [email]);
+            if (existing) return res.status(409).json({ error: 'Este email ya está registrado.' });
+
+            const hash = await bcrypt.hash(password, 10);
+            const userId = await db.runAndSave(
+                'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id',
+                [email, email, hash, 'default']
+            );
+            const token = jwt.sign(
+                { id: userId, username: email, email, role: 'default' },
+                JWT_SECRET,
+                { expiresIn: JWT_EXPIRES }
+            );
+            console.log('✅ Nuevo usuario registrado:', email);
+            res.status(201).json({ token, role: 'default', username: email, email });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error al registrar usuario.' });
         }
     });
 
@@ -175,7 +238,7 @@ initDb().then(async db => {
             const rows = await db.getAll(`
                 SELECT p.*, s.amount AS savings_amount, s.status AS savings_status
                 FROM projects p LEFT JOIN savings s ON s.project_id = p.id
-                ORDER BY p.created_at DESC`);
+                ORDER BY p.progress DESC, p.created_at DESC`);
             res.json(rows);
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al obtener proyectos' }); }
     });
@@ -267,16 +330,27 @@ initDb().then(async db => {
     //  attachment: ahora guarda la URL de Cloudinary (permanente)
     // ═══════════════════════════════════════════════════════════════════════════
 
-    app.get('/api/tickets', requireAdmin, async (req, res) => {
+    // GET /api/tickets — admin: todos | default autenticado: solo los suyos
+    app.get('/api/tickets', requireAuth, async (req, res) => {
         try {
-            res.json(await db.getAll('SELECT * FROM tickets ORDER BY created_at DESC'));
+            if (req.user.role === 'admin') {
+                res.json(await db.getAll('SELECT * FROM tickets ORDER BY created_at DESC'));
+            } else {
+                res.json(await db.getAll(
+                    'SELECT * FROM tickets WHERE user_id=$1 ORDER BY created_at DESC',
+                    [req.user.id]
+                ));
+            }
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al obtener tickets' }); }
     });
 
-    // POST /api/tickets — público, sube adjunto a Cloudinary
-    app.post('/api/tickets', upload.single('attachment'), async (req, res) => {
+    // POST /api/tickets — optionalAuth: guarda email/user_id si hay token, si no es anónimo
+    app.post('/api/tickets', optionalAuth, upload.single('attachment'), async (req, res) => {
         try {
-            const { date, subject, description, priority = 'Media' } = req.body;
+            const { date, subject, description } = req.body;
+            // Normalizar prioridad: quitar tilde para cumplir el CHECK constraint
+            const rawPriority = req.body.priority || 'Media';
+            const priority = rawPriority.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             if (!date || !subject || !description)
                 return res.status(400).json({ error: 'date, subject y description requeridos' });
 
@@ -286,9 +360,13 @@ initDb().then(async db => {
                 attachmentUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
             }
 
+            // Email: del JWT si está autenticado, o del campo del formulario si lo escribió manualmente
+            const ticketEmail = req.user?.email || (req.body.email?.trim() || null);
+            const ticketUserId = req.user?.id || null;
+
             const id = await db.runAndSave(
-                'INSERT INTO tickets (date,subject,description,priority,attachment) VALUES ($1,$2,$3,$4,$5)',
-                [date, subject, description, priority, attachmentUrl]);
+                'INSERT INTO tickets (date,subject,description,priority,attachment,email,user_id) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+                [date, subject, description, priority, attachmentUrl, ticketEmail, ticketUserId]);
 
             const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [id]);
             ticketEvents.emit('new_ticket', ticket);
@@ -433,9 +511,17 @@ initDb().then(async db => {
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error dashboard' }); }
     });
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`🚀 Servidor SyP en puerto ${PORT}`);
         console.log(`   Auth: JWT | Storage: Cloudinary`);
+    });
+    server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.error(`❌ Puerto ${PORT} en uso. Ejecuta: Get-NetTCPConnection -LocalPort ${PORT} -State Listen | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }`);
+        } else {
+            console.error('❌ Error del servidor:', err);
+        }
+        process.exit(1);
     });
 
 }).catch(err => { console.error('❌ Error BD:', err); process.exit(1); });

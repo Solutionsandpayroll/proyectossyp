@@ -1,5 +1,14 @@
 -- Solutions & Payroll — Esquema de base de datos
 
+CREATE TABLE IF NOT EXISTS users (
+  id         SERIAL PRIMARY KEY,
+  username   VARCHAR(50) NOT NULL UNIQUE,
+  email      TEXT        UNIQUE,
+  password   TEXT        NOT NULL,
+  role       VARCHAR(20) NOT NULL DEFAULT 'default',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS projects (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   area        TEXT NOT NULL,
@@ -27,6 +36,8 @@ CREATE TABLE IF NOT EXISTS tickets (
   priority    TEXT NOT NULL DEFAULT 'Media' CHECK(priority IN ('Baja','Media','Alta','Critica')),
   attachment  TEXT,
   status      TEXT NOT NULL DEFAULT 'Abierto' CHECK(status IN ('Abierto','En Revisión','Cerrado')),
+  email       TEXT,
+  user_id     INTEGER REFERENCES users(id),
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
