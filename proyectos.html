@@ -122,13 +122,31 @@
 
             <div class="flex-1 overflow-auto p-8 custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <!-- Buscador -->
-                    <div class="relative">
-                        <span
-                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                        <input id="search-procesos"
-                            class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                            placeholder="Buscar por nombre, área, encargado o responsable..." type="text" />
+                    <!-- Buscador + Filtro de estado -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input id="search-procesos"
+                                class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                                placeholder="Buscar por nombre, área, encargado o responsable..." type="text" />
+                        </div>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">filter_list</span>
+                            <select id="filter-estado"
+                                class="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none appearance-none cursor-pointer">
+                                <option value="">Todos los estados</option>
+                                <option>En Progreso</option>
+                                <option>En Revisión</option>
+                                <option>Ejecución</option>
+                                <option>En Pruebas</option>
+                                <option>Completado</option>
+                                <option>En Pausa</option>
+                                <option>Cancelado</option>
+                                <option>Finalizado</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Tabla -->
@@ -594,14 +612,19 @@
             } catch (e) { alert('Error al eliminar el avance.'); }
         }
 
-        document.getElementById('search-procesos').addEventListener('input', function () {
-            const q = this.value.toLowerCase().trim();
-            if (!q) { renderProcesos(allProcesos); return; }
-            renderProcesos(allProcesos.filter(p =>
+        function aplicarFiltros() {
+            const q = document.getElementById('search-procesos').value.toLowerCase().trim();
+            const estado = document.getElementById('filter-estado').value;
+            let result = allProcesos;
+            if (q) result = result.filter(p =>
                 p.name.toLowerCase().includes(q) || p.area.toLowerCase().includes(q) ||
                 p.leader.toLowerCase().includes(q) || (p.encargado && p.encargado.toLowerCase().includes(q))
-            ));
-        });
+            );
+            if (estado) result = result.filter(p => p.status === estado);
+            renderProcesos(result);
+        }
+        document.getElementById('search-procesos').addEventListener('input', aplicarFiltros);
+        document.getElementById('filter-estado').addEventListener('change', aplicarFiltros);
 
         function mostrarToast() {
             const toast = document.getElementById('toast-estado');
