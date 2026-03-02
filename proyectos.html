@@ -503,10 +503,10 @@
             const editId = document.getElementById('edit-proceso-id').value;
             try {
                 if (editId) {
-                    const res = await fetch(`${API}/proyectos/${editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                    const res = await authFetch(`${API}/proyectos/${editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
                     if (!res.ok) throw new Error('Error al actualizar');
                 } else {
-                    const res = await fetch(`${API}/proyectos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                    const res = await authFetch(`${API}/proyectos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
                     if (!res.ok) throw new Error('Error al crear');
                 }
                 cerrarModalProceso();
@@ -532,7 +532,7 @@
             e.preventDefault();
             const fd = new FormData(e.target), projectId = fd.get('project_id'), body = Object.fromEntries(fd.entries());
             try {
-                const res = await fetch(`${API}/proyectos/${projectId}/avances`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
+                const res = await authFetch(`${API}/proyectos/${projectId}/avances`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body) });
                 if (!res.ok) throw new Error('Error al guardar avance');
                 cerrarModalAvances();
                 await loadProcesos();
@@ -562,7 +562,7 @@
             if (!list) return;
             list.innerHTML = `<div class="text-xs text-slate-400 flex items-center gap-2"><span class="material-symbols-outlined animate-spin text-sm">sync</span> Cargando...</div>`;
             try {
-                const res = await fetch(`${API}/proyectos/${projectId}/avances`, { credentials: 'include' });
+                const res = await authFetch(`${API}/proyectos/${projectId}/avances`, { credentials: 'include' });
                 if (!res.ok) throw new Error('Error al obtener avances');
                 const data = await res.json();
                 if (!data.length) {
@@ -589,7 +589,7 @@
         async function deleteAvance(avanceId, projectId) {
             if (!confirm('¿Eliminar este avance?')) return;
             try {
-                await fetch(`${API}/avances/${avanceId}`, { method: 'DELETE', credentials: 'include' });
+                await authFetch(`${API}/avances/${avanceId}`, { method: 'DELETE', credentials: 'include' });
                 await loadProcesos();
             } catch (e) { alert('Error al eliminar el avance.'); }
         }
