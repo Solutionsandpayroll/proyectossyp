@@ -13,8 +13,9 @@ require('dotenv').config();
 
 const EventEmitter = require('events');
 const ticketEvents = new EventEmitter();
-const { notifyNewTicket } = require('./utils/emailAgent');
+const { notifyNewTicket, notifyTicketConfirmation } = require('./utils/emailAgent');
 ticketEvents.on('new_ticket', notifyNewTicket);
+ticketEvents.on('new_ticket', notifyTicketConfirmation);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
