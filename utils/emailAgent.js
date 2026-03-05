@@ -1,54 +1,68 @@
-// emailAgent.js — usa Brevo (API HTTPS, funciona en Render, soporta múltiples destinatarios)
+// emailAgent.js — usa Mailjet (API HTTPS, funciona en Render, soporta múltiples destinatarios)
 
-const BREVO_API_KEY   = process.env.BREVO_API_KEY;
-const BREVO_FROM_EMAIL = process.env.BREVO_FROM_EMAIL; // email verificado en Brevo
-const fromName        = process.env.EMAIL_FROM_NAME || 'S&P Gestión';
+const MAILJET_API_KEY    = process.env.MAILJET_API_KEY;
+const MAILJET_SECRET_KEY = process.env.MAILJET_SECRET_KEY;
+const FROM_EMAIL         = process.env.EMAIL_FROM;
+const fromName           = process.env.EMAIL_FROM_NAME || 'S&P Gestión';
 
-const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
+const MAILJET_URL = 'https://api.mailjet.com/v3.1/send';
 
 /**
- * Envía un email a través de la API HTTP de Brevo.
+ * Envía un email a través de la API HTTP de Mailjet.
  * @param {object} opts - { to: string | string[], subject: string, html: string }
  */
-async function sendViaBrevo({ to, subject, html }) {
+async function sendViaMailjet({ to, subject, html }) {
     const toList = (Array.isArray(to) ? to : [to])
         .map(e => e.trim()).filter(Boolean)
-        .map(email => ({ email }));
+        .map(email => ({ Email: email }));
 
     if (!toList.length) {
-        console.warn('[BREVO] No hay destinatarios, correo omitido.');
+        console.warn('[MAILJET] No hay destinatarios, correo omitido.');
         return;
     }
 
+    const credentials = Buffer.from(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`).toString('base64');
+
     const payload = {
-        sender: { name: fromName, email: BREVO_FROM_EMAIL },
-        to: toList,
-        subject,
-        htmlContent: html,
+        Messages: [{
+            From: { Email: FROM_EMAIL, Name: fromName },
+            To: toList,
+            Subject: subject,
+            HTMLPart: html,
+        }]
     };
 
-    const res = await fetch(BREVO_URL, {
+    const res = await fetch(MAILJET_URL, {
         method: 'POST',
         headers: {
-            'accept':       'application/json',
-            'content-type': 'application/json',
-            'api-key':      BREVO_API_KEY,
+            'Content-Type':  'application/json',
+            'Authorization': `Basic ${credentials}`,
         },
         body: JSON.stringify(payload),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-        const errBody = await res.text();
-        throw new Error(`Brevo ${res.status}: ${errBody}`);
+        throw new Error(`Mailjet ${res.status}: ${JSON.stringify(data)}`);
     }
 
-    const data = await res.json();
+    // Mailjet puede devolver 200 pero con errores por mensaje
+    const messages = data?.Messages || [];
+    messages.forEach((msg, i) => {
+        if (msg.Status !== 'success') {
+            console.error(`[MAILJET] Mensaje ${i} falló — Status: ${msg.Status}`, JSON.stringify(msg.Errors || msg));
+        } else {
+            console.log(`[MAILJET] Mensaje ${i} OK — MessageID: ${msg.To?.[0]?.MessageID}`);
+        }
+    });
+
     return data;
 }
 
 // ── Comprobación de configuración ────────────────────────────────────────────
-if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
-    console.warn('⚠️  BREVO_API_KEY o BREVO_FROM_EMAIL no configurados. Los correos se simularán en la consola.');
+if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY || !FROM_EMAIL) {
+    console.warn('⚠️  MAILJET_API_KEY, MAILJET_SECRET_KEY o EMAIL_FROM no configurados. Los correos se simularán en la consola.');
 }
 
 // ── notifyNewTicket ───────────────────────────────────────────────────────────
@@ -62,7 +76,7 @@ async function notifyNewTicket(ticket) {
     const toList = rawTo.split(',').map(e => e.trim()).filter(Boolean);
     if (!toList.length) { console.warn('EMAIL_TO no configurado.'); return; }
 
-    if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
+    if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY || !FROM_EMAIL) {
         console.log(`[SIMULACIÓN EMAIL] 🚨 Ticket #${ticket.id} - ${ticket.subject} → ${toList.join(', ')}`);
         return;
     }
@@ -93,7 +107,7 @@ async function notifyNewTicket(ticket) {
         </div>`;
 
     try {
-        await sendViaBrevo({
+        await sendViaMailjet({
             to: toList,
             subject: `🚨 Nuevo Ticket #${ticket.id} - ${ticket.subject}`,
             html,
@@ -112,7 +126,7 @@ async function notifyTicketConfirmation(ticket) {
         return;
     }
 
-    if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
+    if (!MAILJET_API_KEY || !MAILJET_SECRET_KEY || !FROM_EMAIL) {
         console.log(`[SIMULACIÓN EMAIL CONFIRMACIÓN] ✅ Ticket #${ticket.id} confirmado a ${ticket.email}`);
         return;
     }
@@ -140,9 +154,9 @@ async function notifyTicketConfirmation(ticket) {
             </div>
         </div>`;
 
-    console.log(`[EMAIL CONFIRMACION] Enviando a: ${ticket.email} desde: ${BREVO_FROM_EMAIL}`);
+    console.log(`[EMAIL CONFIRMACION] Enviando a: ${ticket.email} desde: ${FROM_EMAIL}`);
     try {
-        await sendViaBrevo({
+        await sendViaMailjet({
             to: ticket.email,
             subject: `✅ Confirmación de ticket #${ticket.id} - ${ticket.subject}`,
             html,
