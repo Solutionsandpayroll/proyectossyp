@@ -1,33 +1,71 @@
-const nodemailer = require('nodemailer');
+// emailAgent.js — usa Brevo (API HTTPS, funciona en Render, soporta múltiples destinatarios)
 
-const gmailUser = process.env.GMAIL_USER;
-const gmailPass = process.env.GMAIL_APP_PASSWORD;
-const fromName = process.env.EMAIL_FROM_NAME || 'S&P Gestión';
+const BREVO_API_KEY   = process.env.BREVO_API_KEY;
+const BREVO_FROM_EMAIL = process.env.BREVO_FROM_EMAIL; // email verificado en Brevo
+const fromName        = process.env.EMAIL_FROM_NAME || 'S&P Gestión';
 
-let transporter;
-if (gmailUser && gmailPass) {
-    transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: gmailUser, pass: gmailPass },
+const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
+
+/**
+ * Envía un email a través de la API HTTP de Brevo.
+ * @param {object} opts - { to: string | string[], subject: string, html: string }
+ */
+async function sendViaBrevo({ to, subject, html }) {
+    const toList = (Array.isArray(to) ? to : [to])
+        .map(e => e.trim()).filter(Boolean)
+        .map(email => ({ email }));
+
+    if (!toList.length) {
+        console.warn('[BREVO] No hay destinatarios, correo omitido.');
+        return;
+    }
+
+    const payload = {
+        sender: { name: fromName, email: BREVO_FROM_EMAIL },
+        to: toList,
+        subject,
+        htmlContent: html,
+    };
+
+    const res = await fetch(BREVO_URL, {
+        method: 'POST',
+        headers: {
+            'accept':       'application/json',
+            'content-type': 'application/json',
+            'api-key':      BREVO_API_KEY,
+        },
+        body: JSON.stringify(payload),
     });
-} else {
-    console.warn('⚠️  GMAIL_USER o GMAIL_APP_PASSWORD no configurados. Los correos se simularán en la consola.');
+
+    if (!res.ok) {
+        const errBody = await res.text();
+        throw new Error(`Brevo ${res.status}: ${errBody}`);
+    }
+
+    const data = await res.json();
+    return data;
 }
 
+// ── Comprobación de configuración ────────────────────────────────────────────
+if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
+    console.warn('⚠️  BREVO_API_KEY o BREVO_FROM_EMAIL no configurados. Los correos se simularán en la consola.');
+}
+
+// ── notifyNewTicket ───────────────────────────────────────────────────────────
 async function notifyNewTicket(ticket) {
     if (!ticket) {
         console.error('Alerta de correo cancelada: el ticket es nulo.');
         return;
     }
-    if (!transporter) {
-        console.log(`[SIMULACIÓN EMAIL] 🚨 Ticket #${ticket.id} - ${ticket.subject}`);
-        return;
-    }
 
-    const fromEmail = `${fromName} <${gmailUser}>`;
     const rawTo = process.env.EMAIL_TO || '';
     const toList = rawTo.split(',').map(e => e.trim()).filter(Boolean);
     if (!toList.length) { console.warn('EMAIL_TO no configurado.'); return; }
+
+    if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
+        console.log(`[SIMULACIÓN EMAIL] 🚨 Ticket #${ticket.id} - ${ticket.subject} → ${toList.join(', ')}`);
+        return;
+    }
 
     const contactRow = ticket.email
         ? `<p><strong>Email de contacto:</strong> <a href="mailto:${ticket.email}" style="color:#e51148;">${ticket.email}</a></p>`
@@ -55,9 +93,8 @@ async function notifyNewTicket(ticket) {
         </div>`;
 
     try {
-        await transporter.sendMail({
-            from: fromEmail,
-            to: toList.join(', '),
+        await sendViaBrevo({
+            to: toList,
             subject: `🚨 Nuevo Ticket #${ticket.id} - ${ticket.subject}`,
             html,
         });
@@ -67,18 +104,18 @@ async function notifyNewTicket(ticket) {
     }
 }
 
+// ── notifyTicketConfirmation ──────────────────────────────────────────────────
 async function notifyTicketConfirmation(ticket) {
     console.log(`[EMAIL CONFIRMACION] ticket.email recibido: "${ticket?.email}"`);
     if (!ticket || !ticket.email) {
         console.log('[EMAIL CONFIRMACION] Ticket sin email de usuario, se omite confirmación.');
         return;
     }
-    if (!transporter) {
+
+    if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
         console.log(`[SIMULACIÓN EMAIL CONFIRMACIÓN] ✅ Ticket #${ticket.id} confirmado a ${ticket.email}`);
         return;
     }
-
-    const fromEmail = `${fromName} <${gmailUser}>`;
 
     const html = `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
@@ -103,15 +140,14 @@ async function notifyTicketConfirmation(ticket) {
             </div>
         </div>`;
 
-    console.log(`[EMAIL CONFIRMACION] Intentando enviar a: ${ticket.email} desde: ${gmailUser}`);
+    console.log(`[EMAIL CONFIRMACION] Enviando a: ${ticket.email} desde: ${BREVO_FROM_EMAIL}`);
     try {
-        const result = await transporter.sendMail({
-            from: fromEmail,
+        await sendViaBrevo({
             to: ticket.email,
             subject: `✅ Confirmación de ticket #${ticket.id} - ${ticket.subject}`,
             html,
         });
-        console.log(`✅ Confirmación enviada a ${ticket.email}. MessageId: ${result.messageId}`);
+        console.log(`✅ Confirmación enviada a ${ticket.email}`);
     } catch (err) {
         console.error(`❌ Fallo al enviar confirmación a ${ticket.email}:`, err?.message || err);
     }
