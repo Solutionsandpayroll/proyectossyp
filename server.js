@@ -38,6 +38,7 @@ const allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:3000',
     'https://proyectossyp.onrender.com',
+    'https://portal.solutionsandpayroll.com',
 ];
 app.use(cors({
     origin: function (origin, cb) {

@@ -20,7 +20,7 @@
 
     const API = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
         ? 'http://localhost:3000/api'
-        : 'https://proyectossyp.onrender.com/api';
+        : 'https://portal.solutionsandpayroll.com/api';
 
     const PAGE = (document.currentScript?.dataset?.page) || 'index';
     const TOKEN_KEY = 'syp_token';
