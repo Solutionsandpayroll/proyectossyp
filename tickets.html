@@ -284,6 +284,23 @@
         </div>
     </div>
 
+    <!-- ═══ MODAL: DETALLE DE TICKET ═══ -->
+    <div id="modal-detalle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg p-8 relative max-h-[80vh] overflow-y-auto">
+            <button id="detalle-close"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h3 class="text-xl font-black text-primary dark:text-white mb-1 flex items-center gap-2 pr-8">
+                <span class="material-symbols-outlined text-accent">confirmation_number</span>
+                <span id="detalle-subject"></span>
+            </h3>
+            <hr class="my-4 border-slate-200 dark:border-slate-700" />
+            <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2">Descripción</p>
+            <p id="detalle-description" class="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed"></p>
+        </div>
+    </div>
+
     <!-- ═══ MODAL: PREVIEW DE IMAGEN ═══ -->
     <div id="modal-preview"
         class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -440,8 +457,10 @@
                 return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
                 <td class="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">${t.date || '—'}</td>
                 <td class="px-6 py-4">
-                    <p class="text-sm font-semibold">${t.subject}</p>
-                    <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
+                    <button onclick="openDetalle(${t.id})" class="text-left w-full group/title">
+                        <p class="text-sm font-semibold text-primary dark:text-slate-100 group-hover/title:text-accent group-hover/title:underline cursor-pointer transition-colors">${t.subject}</p>
+                        <p class="text-xs text-slate-400 truncate max-w-xs">${t.description || ''}</p>
+                    </button>
                 </td>
                 <td class="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
                     ${t.email
@@ -463,6 +482,24 @@
             </tr>`;
             }).join('');
         }
+
+        // ── Detalle de ticket ───────────────────────────────────────────────────────
+        function openDetalle(id) {
+            const t = allTickets.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('detalle-subject').textContent = t.subject || '';
+            const desc = (t.description || '').trim();
+            const descEl = document.getElementById('detalle-description');
+            descEl.textContent = desc || 'Sin descripción.';
+            descEl.classList.toggle('italic', !desc);
+            descEl.classList.toggle('text-slate-400', !desc);
+            document.getElementById('modal-detalle').classList.remove('hidden');
+        }
+        document.getElementById('detalle-close').onclick = () =>
+            document.getElementById('modal-detalle').classList.add('hidden');
+        document.getElementById('modal-detalle').addEventListener('click', function (e) {
+            if (e.target === this) this.classList.add('hidden');
+        });
 
         // ── Vista previa de imagen ──────────────────────────────────────────────────
         function openPreview(url) {
