@@ -9,6 +9,7 @@
     <script src="auth-guard.js" data-page="ahorros"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -1420,19 +1421,27 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Costo Mensual
-                            SYP (COP)</label>
-                        <input id="costo_mensual_display" type="text" required placeholder="0"
-                            class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
-                        <input type="hidden" name="costo_mensual" id="costo_mensual_value" value="0">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Cargo de la
+                            automatización</label>
+                        <select id="cargo_salario_select" required
+                            class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none">
+                            <option value="" selected>Cargando cargos...</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Costo por
-                            Hora (COP)</label>
-                        <input id="costo_hora_display" type="text" readonly placeholder="Calculado"
-                            class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-200 dark:bg-slate-700 text-sm font-bold text-primary cursor-not-allowed opacity-70" />
-                        <input type="hidden" name="costo_hora" id="costo_hora_value" value="0">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Valor Total
+                            (salario mensual)</label>
+                        <input id="costo_mensual_display" type="text" readonly placeholder="Selecciona un cargo"
+                            class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-200 dark:bg-slate-700 text-sm font-semibold text-primary cursor-not-allowed opacity-80" />
+                        <input type="hidden" name="costo_mensual" id="costo_mensual_value" value="0">
                     </div>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Valor Hora
+                        (costo por hora)</label>
+                    <input id="costo_hora_display" type="text" readonly placeholder="Calculado"
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-200 dark:bg-slate-700 text-sm font-bold text-primary cursor-not-allowed opacity-70" />
+                    <input type="hidden" name="costo_hora" id="costo_hora_value" value="0">
                 </div>
                 <div class="space-y-3 pt-3 border-t border-slate-200">
                     <h4 class="text-sm font-bold text-primary flex items-center gap-1.5">
@@ -1562,6 +1571,7 @@
     <script>
         const API = 'https://portal.solutionsandpayroll.com/api';
         const fmt = n => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+        const fmtSalary = n => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
         const fmtShort = n => {
             if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1).replace('.', ',') + ' M';
             if (n >= 1_000) return '$' + (n / 1_000).toFixed(0) + ' K';
@@ -1580,9 +1590,82 @@
         const PCT_AVANCE = (EJECUTADO / PROYECTADO * 100).toFixed(1);
 
         let allAhorros = [], allProcesosList = [], filteredAhorros = [];
+        let salaryCatalog = [];
         let currentPage = 1;
         const ITEMS_PER_PAGE = 10;
         let chartInstance = null, pieChartInstance = null;
+
+        function groupSalaryCatalog(rows) {
+            const catalog = [];
+            let currentGroup = '';
+            rows.slice(1).forEach(row => {
+                const group = String(row?.[0] ?? '').trim();
+                const cargo = String(row?.[1] ?? '').trim();
+                const valorTotal = Number(row?.[2]) || 0;
+                const valorHora = Number(row?.[3]) || 0;
+                if (group) currentGroup = group;
+                if (!cargo) return;
+                catalog.push({ group: currentGroup, cargo, valorTotal, valorHora });
+            });
+            return catalog;
+        }
+
+        function renderCargoOptions() {
+            const select = document.getElementById('cargo_salario_select');
+            if (!select) return;
+            if (!salaryCatalog.length) {
+                select.innerHTML = '<option value="" selected disabled>No se encontraron cargos</option>';
+                return;
+            }
+
+            const groups = new Map();
+            salaryCatalog.forEach(item => {
+                const key = item.group || 'Sin grupo';
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(item);
+            });
+
+            select.innerHTML = '<option value="" selected disabled>Selecciona un cargo...</option>';
+            for (const [group, items] of groups.entries()) {
+                const optGroup = document.createElement('optgroup');
+                optGroup.label = group;
+                items.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.cargo;
+                    option.textContent = `${item.cargo} - ${fmtSalary(item.valorTotal)} / ${fmtSalary(item.valorHora)}`;
+                    option.dataset.valorTotal = String(item.valorTotal);
+                    option.dataset.valorHora = String(item.valorHora);
+                    optGroup.appendChild(option);
+                });
+                select.appendChild(optGroup);
+            }
+        }
+
+        async function loadSalaryCatalog() {
+            try {
+                const response = await fetch('salarios.xlsx');
+                const buffer = await response.arrayBuffer();
+                const workbook = XLSX.read(buffer, { type: 'array' });
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                salaryCatalog = groupSalaryCatalog(rows);
+                renderCargoOptions();
+            } catch (error) {
+                console.warn('No se pudo cargar salarios.xlsx:', error);
+                const select = document.getElementById('cargo_salario_select');
+                if (select) select.innerHTML = '<option value="" selected disabled>No se pudo cargar salarios.xlsx</option>';
+            }
+        }
+
+        function applySalarySelection(option) {
+            const valorTotal = Number(option?.dataset?.valorTotal) || 0;
+            const valorHora = Number(option?.dataset?.valorHora) || 0;
+            document.getElementById('costo_mensual_value').value = valorTotal;
+            document.getElementById('costo_hora_value').value = valorHora;
+            document.getElementById('costo_mensual_display').value = valorTotal ? fmtSalary(valorTotal) : '';
+            document.getElementById('costo_hora_display').value = valorHora ? fmtSalary(valorHora) : '';
+            calculateAhorros();
+        }
 
         /* ══ TABLA ══ */
         function renderAhorros(data, resetPage = true) {
@@ -1694,18 +1777,19 @@
             modal.classList.add('hidden'); e.target.reset();
             ['costo_mensual_display', 'ahorro-encargado', 'total_antes_display', 'total_actual_display', 'costo_hora_display', 'ahorro_total_display']
                 .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            const cargoSelect = document.getElementById('cargo_salario_select');
+            if (cargoSelect) cargoSelect.selectedIndex = 0;
+            document.getElementById('costo_mensual_value').value = 0;
+            document.getElementById('costo_hora_value').value = 0;
             loadAhorros();
         };
 
-        function formatNoDecimals(n) { return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(n); }
         function calculateAhorros() {
-            const raw = document.getElementById('costo_mensual_display').value.replace(/\./g, '').replace(/,/g, '');
-            const costoMensual = parseFloat(raw) || 0;
+            const costoMensual = parseFloat(document.getElementById('costo_mensual_value').value) || 0;
+            const costoHora = parseFloat(document.getElementById('costo_hora_value').value) || 0;
             document.getElementById('costo_mensual_value').value = costoMensual;
-            if (raw && !isNaN(costoMensual)) document.getElementById('costo_mensual_display').value = costoMensual ? formatNoDecimals(costoMensual) : '';
-            const costoHora = costoMensual / 180;
-            document.getElementById('costo_hora_value').value = costoHora;
-            document.getElementById('costo_hora_display').value = fmt(costoHora);
+            if (!costoMensual) document.getElementById('costo_mensual_display').value = '';
+            document.getElementById('costo_hora_display').value = costoHora ? fmtSalary(costoHora) : '';
             const tgA = parseFloat(document.getElementById('tiempo_gestion_antes').value) || 0;
             const mA = document.getElementById('tiempo_gestion_antes_tipo').value === 'Mensual' ? 12 : 1;
             const tA = tgA * costoHora * mA;
@@ -1717,8 +1801,12 @@
             const ahorro = tA - tC;
             document.getElementById('ahorro_total_value').value = ahorro; document.getElementById('ahorro_total_display').value = fmt(ahorro);
         }
-        ['costo_mensual_display', 'tiempo_gestion_antes', 'tiempo_gestion_actual', 'tiempo_gestion_antes_tipo', 'tiempo_gestion_actual_tipo']
+        ['tiempo_gestion_antes', 'tiempo_gestion_actual', 'tiempo_gestion_antes_tipo', 'tiempo_gestion_actual_tipo']
             .forEach(id => { const el = document.getElementById(id); if (el) { el.addEventListener('input', calculateAhorros); el.addEventListener('change', calculateAhorros); } });
+        document.getElementById('cargo_salario_select').addEventListener('change', function () {
+            const selected = this.options[this.selectedIndex];
+            applySalarySelection(selected);
+        });
         document.getElementById('ahorro-project-select').addEventListener('change', function () {
             const p = allProcesosList.find(x => x.id === parseInt(this.value));
             document.getElementById('ahorro-encargado').value = p ? (p.encargado || '') : '';
@@ -2142,6 +2230,7 @@
         function initPage() {
             loadAhorros();
             loadProcesosForSelect();
+            loadSalaryCatalog();
         }
         window.addEventListener('syp:auth', initPage);
         // Fallback: si syp:auth ya disparó antes de registrar el listener

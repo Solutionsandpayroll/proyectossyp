@@ -60,17 +60,23 @@ const upload = multer({
 });
 
 // Helper: sube un buffer a Cloudinary y devuelve la URL segura
-function uploadToCloudinary(buffer, mimetype) {
+function uploadToCloudinary(buffer, mimetype, originalName) {
     return new Promise((resolve, reject) => {
-        const resourceType = mimetype.startsWith('image/') ? 'image'
-            : mimetype === 'application/pdf' ? 'raw'
-                : 'raw';
+        const resourceType = mimetype && mimetype.startsWith('image/') ? 'image' : 'raw';
+        const uploadOpts = {
+            folder: 'syp-tickets',
+            resource_type: resourceType,
+            use_filename: true,
+            unique_filename: false,
+        };
+        if (originalName) {
+            try {
+                const base = path.parse(originalName).name.replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80);
+                uploadOpts.public_id = `ticket-${Date.now()}-${base}`;
+            } catch (_) { }
+        }
         const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder: 'syp-tickets',
-                resource_type: resourceType,
-                public_id: `ticket-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-            },
+            uploadOpts,
             (error, result) => {
                 if (error) return reject(error);
                 resolve(result.secure_url);
@@ -142,6 +148,7 @@ initDb().then(async db => {
         await db.run(`ALTER TABLE users ADD CONSTRAINT users_email_unique UNIQUE (email)`);
     } catch { /* restricción ya existe */ }
     await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS user_id INTEGER`);
+    await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS attachment_name TEXT`);
 
     // UPSERT admin — garantiza hash correcto en cada deploy
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'Admin2025*';
@@ -358,8 +365,10 @@ initDb().then(async db => {
 
             // Subir buffer a Cloudinary y obtener URL permanente
             let attachmentUrl = null;
+            let attachmentName = null;
             if (req.file) {
-                attachmentUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
+                attachmentUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype, req.file.originalname);
+                attachmentName = req.file.originalname;
             }
 
             // Email: del JWT si está autenticado, o del campo del formulario si lo escribió manualmente
@@ -367,8 +376,8 @@ initDb().then(async db => {
             const ticketUserId = req.user?.id || null;
 
             const id = await db.runAndSave(
-                'INSERT INTO tickets (date,subject,description,priority,attachment,email,user_id) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-                [date, subject, description, priority, attachmentUrl, ticketEmail, ticketUserId]);
+                'INSERT INTO tickets (date,subject,description,priority,attachment,attachment_name,email,user_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+                [date, subject, description, priority, attachmentUrl, attachmentName, ticketEmail, ticketUserId]);
 
             const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [id]);
             ticketEvents.emit('new_ticket', ticket);

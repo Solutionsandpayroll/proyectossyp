@@ -314,6 +314,13 @@
         </div>
     </div>
 
+    <!-- Toast -->
+    <div id="toast-estado"
+        class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg font-bold text-sm opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        Estado actualizado correctamente
+    </div>
+
     <script>
         const API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
             ? 'http://localhost:3000/api'
@@ -343,7 +350,9 @@
             'En Proceso': 'bg-blue-50 text-blue-600',
             'Resuelto': 'bg-emerald-50 text-emerald-600',
             'Cerrado': 'bg-slate-50 text-slate-500',
+            'En Pausa': 'bg-slate-50 text-slate-500',
         };
+        const STATUS_OPTIONS = ['Abierto', 'En Pausa', 'Cerrado'];
 
         // ── Determina el ícono según extensión del archivo ──────────────────────────
         function fileIcon(filename) {
@@ -433,7 +442,7 @@
 
                         <!-- Botón descargar -->
                         <a href="${fileUrl}"
-                           download
+                           download="${t.attachment_name || name}"
                            target="_blank"
                            title="Descargar adjunto"
                            class="btn-download inline-flex items-center gap-1 px-2.5 py-1 rounded-md
@@ -471,7 +480,10 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${pc}">${t.priority}</span>
                 </td>
                 <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span>
+                    ${isAdmin ? (() => {
+                        const optionsHtml = STATUS_OPTIONS.map(opt => `<option value="${opt}" ${t.status === opt ? 'selected' : ''}>${opt}</option>`).join('');
+                        return `<select class="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold ${sc}" data-ticket-id="${t.id}" onchange="cambiarEstadoTicket(${t.id}, this.value)">${optionsHtml}</select>`;
+                    })() : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}">${t.status}</span>`}
                 </td>
                 <td class="px-6 py-4">${adjuntoCell}</td>
                 <td class="px-6 py-4 text-right">
@@ -516,6 +528,30 @@
                 document.getElementById('preview-img').src = '';
             }
         });
+
+        // ── Funciones para cambiar estatus (edición inline por admin) ──────────────
+        async function cambiarEstadoTicket(id, nuevoEstado) {
+            const ticket = allTickets.find(t => t.id === id);
+            if (!ticket) return;
+            const body = { ...ticket, status: nuevoEstado };
+            try {
+                const res = await authFetch(`${API}/tickets/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (!res.ok) throw new Error('Error en backend');
+                ticket.status = nuevoEstado;
+                const select = document.querySelector(`select[data-ticket-id="${id}"]`);
+                if (select) {
+                    const cls = statusColor[nuevoEstado] || 'bg-slate-50 text-slate-500';
+                    select.className = `px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold ${cls}`;
+                }
+                mostrarToast();
+            } catch (e) { console.error(e); alert('Error al actualizar el estado.'); await loadTickets(); }
+        }
+
+        function mostrarToast() {
+            const toast = document.getElementById('toast-estado');
+            toast.style.opacity = '1'; toast.style.pointerEvents = 'auto';
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.pointerEvents = 'none'; }, 2000);
+        }
 
         // ── Carga de tickets ────────────────────────────────────────────────────────
         async function loadTickets() {
