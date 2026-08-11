@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="icon" type="image/png" href="Logo_syp_original.png" />
     <title>Tickets – S&P Gestión</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
@@ -85,7 +86,7 @@
         <!-- ═══ SIDEBAR ═══ -->
         <aside class="w-64 bg-primary flex flex-col h-full border-r border-primary/10">
             <div class="px-5 py-4 flex items-center justify-start border-b border-white/10">
-                <img src="logo.png" alt="Solutions & Payroll" class="h-14 w-auto object-contain" />
+                <img src="Titulo_empresa_v2.png" alt="Solutions & Payroll" class="h-24 w-auto object-contain" />
             </div>
             <nav class="flex-1 px-4 space-y-1 mt-4">
                 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
@@ -327,7 +328,9 @@
             : 'https://portal.solutionsandpayroll.com/api';
         // attachment ahora es una URL completa de Cloudinary (https://res.cloudinary.com/...)
         // Si por compatibilidad viene una ruta relativa antigua, construimos la URL de Render
-        const BASE_URL = 'https://proyectossyp.onrender.com';
+        const BASE_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+            ? 'http://localhost:3000'
+            : 'https://proyectossyp.onrender.com';
 
         const SESSION_KEY = 'syp_session_ticket_ids';
         function getSessionTicketIds() {
@@ -441,9 +444,8 @@
                         ${imgPreview}
 
                         <!-- Botón descargar -->
-                        <a href="${fileUrl}"
+                        <a href="${API}/tickets/${t.id}/download"
                            download="${t.attachment_name || name}"
-                           target="_blank"
                            title="Descargar adjunto"
                            class="btn-download inline-flex items-center gap-1 px-2.5 py-1 rounded-md
                                   bg-primary/5 hover:bg-primary text-primary hover:text-white
@@ -464,7 +466,7 @@
                     : '';
 
                 return `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors group">
-                <td class="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">${t.date || '—'}</td>
+                <td class="px-6 py-4 text-sm text-slate-500 whitespace-nowrap">${t.date ? t.date.split('T')[0] : '—'}</td>
                 <td class="px-6 py-4">
                     <button onclick="openDetalle(${t.id})" class="text-left w-full group/title">
                         <p class="text-sm font-semibold text-primary dark:text-slate-100 group-hover/title:text-accent group-hover/title:underline cursor-pointer transition-colors">${t.subject}</p>

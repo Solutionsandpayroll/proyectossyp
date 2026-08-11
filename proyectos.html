@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="icon" type="image/png" href="Logo_syp_original.png" />
     <title>Procesos – S&P Gestión</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
@@ -64,7 +65,7 @@
         <!-- ═══ SIDEBAR ═══ -->
         <aside class="w-64 bg-primary flex flex-col h-full border-r border-primary/10">
             <div class="px-5 py-4 flex items-center justify-start border-b border-white/10">
-                <img src="logo.png" alt="Solutions & Payroll" class="h-14 w-auto object-contain" />
+                <img src="Titulo_empresa_v2.png" alt="Solutions & Payroll" class="h-24 w-auto object-contain" />
             </div>
             <nav class="flex-1 px-4 space-y-1 mt-4">
                 <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
@@ -122,7 +123,7 @@
 
             <div class="flex-1 overflow-auto p-8 custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    <!-- Buscador + Filtro de estado -->
+                    <!-- Buscador + Filtros -->
                     <div class="flex flex-col sm:flex-row gap-3">
                         <div class="relative flex-1">
                             <span
@@ -135,7 +136,7 @@
                             <span
                                 class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">filter_list</span>
                             <select id="filter-estado"
-                                class="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none appearance-none cursor-pointer">
+                                class="pl-10 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none appearance-none cursor-pointer">
                                 <option value="">Todos los estados</option>
                                 <option>En Progreso</option>
                                 <option>En Revisión</option>
@@ -145,6 +146,22 @@
                                 <option>En Pausa</option>
                                 <option>Cancelado</option>
                                 <option>Finalizado</option>
+                            </select>
+                        </div>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">person</span>
+                            <select id="filter-encargado"
+                                class="pl-10 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none appearance-none cursor-pointer">
+                                <option value="">Todos los encargados</option>
+                            </select>
+                        </div>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">badge</span>
+                            <select id="filter-responsable"
+                                class="pl-10 pr-8 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:outline-none appearance-none cursor-pointer">
+                                <option value="">Todos los responsables</option>
                             </select>
                         </div>
                     </div>
@@ -447,6 +464,8 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 allProcesos = Array.isArray(data) ? data : [];
+                populateEncargadoFilter();
+                populateResponsableFilter();
                 renderProcesos(allProcesos);
             } catch (e) { console.error('Error cargando procesos:', e); showErrorState(); }
         }
@@ -612,19 +631,43 @@
             } catch (e) { alert('Error al eliminar el avance.'); }
         }
 
+        function populateEncargadoFilter() {
+            const select = document.getElementById('filter-encargado');
+            const currentValue = select.value;
+            const encargados = [...new Set(allProcesos.map(p => p.encargado).filter(Boolean))].sort();
+            select.innerHTML = '<option value="">Todos los encargados</option>' +
+                encargados.map(e => `<option value="${e}">${e}</option>`).join('');
+            if (encargados.some(e => e === currentValue)) select.value = currentValue;
+        }
+
+        function populateResponsableFilter() {
+            const select = document.getElementById('filter-responsable');
+            const currentValue = select.value;
+            const responsables = [...new Set(allProcesos.map(p => p.leader).filter(Boolean))].sort();
+            select.innerHTML = '<option value="">Todos los responsables</option>' +
+                responsables.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (responsables.some(r => r === currentValue)) select.value = currentValue;
+        }
+
         function aplicarFiltros() {
             const q = document.getElementById('search-procesos').value.toLowerCase().trim();
             const estado = document.getElementById('filter-estado').value;
+            const encargado = document.getElementById('filter-encargado').value;
+            const responsable = document.getElementById('filter-responsable').value;
             let result = allProcesos;
             if (q) result = result.filter(p =>
                 p.name.toLowerCase().includes(q) || p.area.toLowerCase().includes(q) ||
                 p.leader.toLowerCase().includes(q) || (p.encargado && p.encargado.toLowerCase().includes(q))
             );
             if (estado) result = result.filter(p => p.status === estado);
+            if (encargado) result = result.filter(p => p.encargado === encargado);
+            if (responsable) result = result.filter(p => p.leader === responsable);
             renderProcesos(result);
         }
         document.getElementById('search-procesos').addEventListener('input', aplicarFiltros);
         document.getElementById('filter-estado').addEventListener('change', aplicarFiltros);
+        document.getElementById('filter-encargado').addEventListener('change', aplicarFiltros);
+        document.getElementById('filter-responsable').addEventListener('change', aplicarFiltros);
 
         function mostrarToast() {
             const toast = document.getElementById('toast-estado');

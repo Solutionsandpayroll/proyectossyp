@@ -6,8 +6,6 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const cloudinary = require('cloudinary').v2;
-const streamifier = require('streamifier'); // convierte buffer a stream para Cloudinary
 const initDb = require('./db/init');
 require('dotenv').config();
 
@@ -23,13 +21,6 @@ const PORT = process.env.PORT || 3000;
 // ── JWT ────────────────────────────────────────────────────────────────────────
 const JWT_SECRET = process.env.JWT_SECRET || 'syp-jwt-fallback-secret-2025';
 const JWT_EXPIRES = '8h';
-
-// ── Cloudinary ─────────────────────────────────────────────────────────────────
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
 const allowedOrigins = [
@@ -52,39 +43,22 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// ── Multer en memoria → luego subimos manualmente a Cloudinary ────────────────
-// Usamos memoryStorage para no tocar el disco de Render
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 },  // 10 MB máximo
-});
-
-// Helper: sube un buffer a Cloudinary y devuelve la URL segura
-function uploadToCloudinary(buffer, mimetype, originalName) {
-    return new Promise((resolve, reject) => {
-        const resourceType = mimetype && mimetype.startsWith('image/') ? 'image' : 'raw';
-        const uploadOpts = {
-            folder: 'syp-tickets',
-            resource_type: resourceType,
-            use_filename: true,
-            unique_filename: false,
-        };
-        if (originalName) {
-            try {
-                const base = path.parse(originalName).name.replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80);
-                uploadOpts.public_id = `ticket-${Date.now()}-${base}`;
-            } catch (_) { }
-        }
-        const uploadStream = cloudinary.uploader.upload_stream(
-            uploadOpts,
-            (error, result) => {
-                if (error) return reject(error);
-                resolve(result.secure_url);
-            }
-        );
-        streamifier.createReadStream(buffer).pipe(uploadStream);
-    });
+// ── Multer en disco local ─────────────────────────────────────────────────────
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
 }
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: uploadsDir,
+        filename: (req, file, cb) => {
+            const ext = path.extname(file.originalname);
+            const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80);
+            cb(null, `ticket-${Date.now()}-${base}${ext}`);
+        },
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 // ── Middleware JWT ─────────────────────────────────────────────────────────────
 function getToken(req) {
@@ -149,6 +123,8 @@ initDb().then(async db => {
     } catch { /* restricción ya existe */ }
     await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS user_id INTEGER`);
     await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS attachment_name TEXT`);
+    await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS attachment_public_id TEXT`);
+    await db.run(`ALTER TABLE tickets ADD COLUMN IF NOT EXISTS attachment_resource_type TEXT`);
 
     // UPSERT admin — garantiza hash correcto en cada deploy
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'Admin2025*';
@@ -336,7 +312,7 @@ initDb().then(async db => {
 
     // ═══════════════════════════════════════════════════════════════════════════
     //  TICKETS — crear: público | resto: admin
-    //  attachment: ahora guarda la URL de Cloudinary (permanente)
+    //  attachment: ruta local en /uploads
     // ═══════════════════════════════════════════════════════════════════════════
 
     // GET /api/tickets — admin: todos | default autenticado: solo los suyos
@@ -363,11 +339,11 @@ initDb().then(async db => {
             if (!date || !subject || !description)
                 return res.status(400).json({ error: 'date, subject y description requeridos' });
 
-            // Subir buffer a Cloudinary y obtener URL permanente
-            let attachmentUrl = null;
+            // Guardar archivo localmente
+            let attachmentPath = null;
             let attachmentName = null;
             if (req.file) {
-                attachmentUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype, req.file.originalname);
+                attachmentPath = 'uploads/' + req.file.filename;
                 attachmentName = req.file.originalname;
             }
 
@@ -377,7 +353,7 @@ initDb().then(async db => {
 
             const id = await db.runAndSave(
                 'INSERT INTO tickets (date,subject,description,priority,attachment,attachment_name,email,user_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
-                [date, subject, description, priority, attachmentUrl, attachmentName, ticketEmail, ticketUserId]);
+                [date, subject, description, priority, attachmentPath, attachmentName, ticketEmail, ticketUserId]);
 
             const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [id]);
             ticketEvents.emit('new_ticket', ticket);
@@ -401,34 +377,46 @@ initDb().then(async db => {
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al actualizar ticket' }); }
     });
 
-    // DELETE ticket → también elimina el archivo de Cloudinary
+    // DELETE ticket → también elimina el archivo adjunto local
     app.delete('/api/tickets/:id', requireAdmin, async (req, res) => {
         try {
             const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [req.params.id]);
             if (!ticket) return res.status(404).json({ error: 'Ticket no encontrado' });
 
-            // Eliminar de Cloudinary si existe
+            // Eliminar archivo local si existe
             if (ticket.attachment) {
                 try {
-                    // Extraer public_id de la URL de Cloudinary
-                    // URL formato: https://res.cloudinary.com/<cloud>/image/upload/v.../syp-tickets/ticket-xxx
-                    const urlParts = ticket.attachment.split('/');
-                    const uploadIdx = urlParts.indexOf('upload');
-                    if (uploadIdx !== -1) {
-                        // Todo después de /upload/v123456/ es el public_id
-                        const afterUpload = urlParts.slice(uploadIdx + 2).join('/');
-                        const publicId = afterUpload.replace(/\.[^/.]+$/, ''); // quitar extensión
-                        await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
-                        console.log('🗑️  Cloudinary eliminado:', publicId);
+                    const filePath = path.join(__dirname, ticket.attachment);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                        console.log('🗑️  Archivo eliminado:', ticket.attachment);
                     }
-                } catch (cloudErr) {
-                    console.warn('No se pudo eliminar de Cloudinary:', cloudErr.message);
+                } catch (fileErr) {
+                    console.warn('No se pudo eliminar archivo:', fileErr.message);
                 }
             }
 
             await db.run('DELETE FROM tickets WHERE id=$1', [req.params.id]);
             res.json({ message: 'Ticket eliminado' });
         } catch (err) { console.error(err); res.status(500).json({ error: 'Error al eliminar ticket' }); }
+    });
+
+    // GET /api/tickets/:id/download — sirve archivo adjunto local
+    app.get('/api/tickets/:id/download', async (req, res) => {
+        try {
+            const ticket = await db.getRow('SELECT * FROM tickets WHERE id=$1', [req.params.id]);
+            if (!ticket || !ticket.attachment) return res.status(404).json({ error: 'Sin adjunto' });
+
+            const filePath = path.join(__dirname, ticket.attachment);
+            if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Archivo no encontrado' });
+
+            const filename = ticket.attachment_name || path.basename(ticket.attachment);
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+            res.sendFile(filePath);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error al descargar adjunto' });
+        }
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -524,7 +512,7 @@ initDb().then(async db => {
 
     const server = app.listen(PORT, () => {
         console.log(`🚀 Servidor SyP en puerto ${PORT}`);
-        console.log(`   Auth: JWT | Storage: Cloudinary`);
+        console.log(`   Auth: JWT | Storage: Local (/uploads)`);
     });
     server.on('error', (err) => {
         if (err.code === 'EADDRINUSE') {
